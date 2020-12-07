@@ -1,0 +1,17 @@
+[package]
+name = "joinem"
+version = "0.1.0"
+authors = ["Jonathan Rowlands <jonrowlands83@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hyper = { version = "0.13.9", features = ["stream"] }
+tokio = { version = "0.2", features = ["full"] }
+# warp = {git = "https://github.com/seanmonstar/warp.git", branch="master"}
+warp = "0.2.5"
+pretty_env_logger = "0.4.0"
+futures = { version = "0.3", default-features = false, features = ["alloc"] }
+listenfd = "0.3.3"
+# tower = "0.3"
