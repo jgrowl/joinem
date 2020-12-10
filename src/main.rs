@@ -41,6 +41,30 @@ lazy_static! {
     static ref JOINEM_CONFIG: JoinemConfig = JoinemConfig::new();
 }
 
+
+#[tokio::main]
+async fn main() -> Result<(), fantoccini::error::CmdError> {
+  env_logger::init();
+
+  let running = Arc::new(AtomicBool::new(true));
+  let r = running.clone();
+
+  ctrlc::set_handler(move || {
+    r.store(false, Ordering::SeqCst);
+  }).expect("Error setting Ctrl-C handler");
+
+  println!("Waiting for Ctrl-C...");
+  run_bots();
+
+  while running.load(Ordering::SeqCst) { }
+  println!("\nShutting down joinem!");
+
+  cleanup();
+
+
+  Ok(())
+}
+
 fn run_bots() {
     // let mut c = new_client().await.expect("Failed to create new client!");
     // if !is_logged_in_to_amazon(& mut c).await {
@@ -64,35 +88,13 @@ fn run_bots() {
     }
 }
 
-#[tokio::main]
-async fn main() -> Result<(), fantoccini::error::CmdError> {
-  env_logger::init();
-
-  let running = Arc::new(AtomicBool::new(true));
-  let r = running.clone();
-
-  ctrlc::set_handler(move || {
-    r.store(false, Ordering::SeqCst);
-  }).expect("Error setting Ctrl-C handler");
-
-  println!("Waiting for Ctrl-C...");
-  run_bots();
-
-  while running.load(Ordering::SeqCst) { }
-  println!("\nShutting down joinem!");
-
-  cleanup();
-
-  // delay_for(Duration::from_millis(20000)).await;
-  // loop{
-    // delay_for(Duration::from_secs(30)).await;
-  // }
-
-  Ok(())
-}
-
 fn cleanup() {
   // fs::remove_dir_all("/tmp/joinem").unwrap();
   // rm_rf::ensure_removed("/tmp/joinem").expect("couldn't delete");
 }
 
+
+  // delay_for(Duration::from_millis(20000)).await;
+  // loop{
+    // delay_for(Duration::from_secs(30)).await;
+  // }
