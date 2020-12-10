@@ -9,7 +9,7 @@ use std::process;
 use crate::JOINEM_CONFIG;
 use crate::config::Item;
 
-use crate::new_client;
+use crate::webdriver::new_client;
 
 async fn reject_coverage(c: & mut Client) {
   let no_coverage = c.find(Locator::Id("siNoCoverage-announce")).await;
