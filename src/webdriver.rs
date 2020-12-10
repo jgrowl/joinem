@@ -30,7 +30,7 @@ pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
   // Ok(Client::new("http://localhost:9515").await.expect("failed to connect to WebDriver"))
   //
   
-  let out_dir_base = "/tmp/joinem";
+  let out_dir_base = JOINEM_CONFIG.data();
   // std::fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
 
   let out_dir = format!("{}/{}", out_dir_base, random_string());

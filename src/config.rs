@@ -28,6 +28,10 @@ impl JoinemConfig {
     JoinemConfig { settings: settings }
   }
 
+  pub fn data(&self) -> String {
+    self.settings.get("data").unwrap().clone()
+  }
+
   pub fn password(&self) -> String {
     self.settings.get("password").unwrap().clone()
   }
