@@ -17,7 +17,7 @@ use std::process;
 use std::time::{Duration};
 use std::path::Path;
 
-use log::{info, warn};
+use log::{info, warn, debug};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{JoinemConfig, Item};
@@ -82,6 +82,7 @@ fn run_bots() {
     let items = JOINEM_CONFIG.items();
 
     for item in items.into_iter() {
+      debug!("Starting {:?}", item.0);
       tokio::spawn(async move {
         check_amazon_item(item).await;
       });
