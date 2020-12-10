@@ -7,6 +7,7 @@ use fantoccini::{Client, Locator};
 extern crate fs_extra;
 use fs_extra::dir::copy;
 use fs_extra::dir::CopyOptions;
+use log::{info, warn, debug};
 
 use crate::JOINEM_CONFIG;
 
@@ -36,7 +37,6 @@ pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
 
   // fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
   //
-  // THIS ONE
   fs::create_dir_all(&out_dir).expect("Failed to create directory!");
   //
   // println!("outdir: {}", out_dir);
@@ -48,6 +48,7 @@ pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
 // copy source/dir1 to target/dir1
 // let default = "~/Library/Caches/Google/Chrome/Default";
 let default = JOINEM_CONFIG.chrome_user_data();
+debug!("Chrome user_data path set to {}", &default);
 // println!("{}", default);
 // let default = "/Users/jon/Library/Caches/Google/Chrome";
 // copy(default, &out_dir, &options).expect("uho");
