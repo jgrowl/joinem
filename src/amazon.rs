@@ -1,5 +1,5 @@
 use std::time::{Duration};
-use log::{info, warn};
+use log::{info, warn, debug};
 use std::str::FromStr;
 use tokio::time::delay_for;
 use fantoccini::{Client, Locator};
@@ -199,7 +199,7 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             }
               
             // confirm
-            info!("{} BUY CONFIRMED!", url.0);
+            debug!("{} BUY CONFIRMED!", url.0);
             confirm_buy_now(& mut c2).await;
 
             delay_for(Duration::from_secs(15)).await;
@@ -207,10 +207,10 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             process::exit(0x0100);
             break;
           } else {
-            info!("{} Too Expensive!", url.0);
+            debug!("{} Too Expensive!", url.0);
           }
         } else { 
-            info!("{} Not in stock!", url.0);
+            debug!("{} Not in stock!", url.0);
         }
 
           // info!("{}, cannot be bought now! Sleeping...", url.0);

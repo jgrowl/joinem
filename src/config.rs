@@ -2,12 +2,46 @@
 use std::env;
 use base_config::{Config, File, FileFormat, Environment};
 use std::collections::HashMap;
+use log::{info, warn, debug};
+use std::{io, fs};
+use std::path::Path;
+
+extern crate fs_extra;
+use fs_extra::dir::copy;
+use fs_extra::dir::CopyOptions;
+use crate::util::{copy_dir_all, random_string};
+
+use std::fs::read_dir;
+
+use std::collections::HashSet;
+use std::iter::FromIterator;
+// use crate::DATA_DIRS;
+use crate::get_data_dirs;
 
 pub type Item = (String, f32, String);
 
+use std::sync::{Arc, Mutex};
+
+
 pub struct JoinemConfig {
-  settings: HashMap<String, String>
+  settings: HashMap<String, String>,
+  // data_dirs: Vec<String>
 }
+// use std::ops::{DerefMut, Deref};
+//
+// impl<T> Deref for JoinemConfig<T> {
+//     type Target = T;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.value
+//     }
+// }
+//
+// impl<T> DerefMut for JoinemConfig<T> {
+//     fn deref_mut(&mut self) -> &mut Self::Target {
+//         &mut self.value
+//     }
+// }
 
 impl JoinemConfig {
   pub fn new() -> JoinemConfig { 
@@ -30,6 +64,79 @@ impl JoinemConfig {
 
   pub fn data(&self) -> String {
     self.settings.get("data").unwrap().clone()
+  }
+
+  // pub fn next_available_data_dir(&mut self) -> String {
+  //   // let out_dir_base = self.data();
+  //   self.find_or_create_data_folder()
+  // }
+
+  pub fn create_data_folder(&self, out_dir: String) {
+    // std::fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
+    // self.settings.get("data").unwrap().clone()
+    // fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
+  fs::create_dir_all(&out_dir).expect("Failed to create directory!");
+
+
+  let options = CopyOptions::new(); //Initialize default values for CopyOptions
+// options.mirror_copy = true; // To mirror copy the whole structure of the source directory
+//
+
+// copy source/dir1 to target/dir1
+// let default = "~/Library/Caches/Google/Chrome/Default";
+let default = self.chrome_user_data();
+debug!("Chrome user_data path set to {}", &default);
+// println!("{}", default);
+// let default = "/Users/jon/Library/Caches/Google/Chrome";
+// copy(default, &out_dir, &options).expect("uho");
+//
+
+  // this actually copies
+  copy_dir_all(default, &out_dir).expect("Failed to copy chrome data dir");
+
+  // println!("outdir: {}", out_dir);
+  // copy_dir_all("~/Library/Caches/Google/Chrome/Default", out_dir);
+  //
+  }
+
+
+  pub fn find_or_create_data_folder(&self) -> String {
+    // scan folder structure to see if any folders are there
+    let paths = fs::read_dir(self.data()).unwrap();
+    let paths: Vec<String> = paths.into_iter().map(|x| 
+      x.unwrap().path().to_str().to_owned().unwrap().to_owned()
+    ).collect();
+
+    let b: HashSet<String> = paths.iter().cloned().collect();
+
+    // let mut data_dirs = Arc::clone(&DATA_DIRS);
+    // let mut data_dirs = data_dirs.lock().unwrap();
+    let mut data_dirs = get_data_dirs();
+
+    let a: HashSet<String> = data_dirs.clone().iter().cloned().collect();
+
+    let diff1: HashSet<_> = a.symmetric_difference(&b).collect();
+    let mut v = Vec::from_iter(diff1.iter());
+
+    let out_dir = if v.len() > 0 {
+      let out_dir= v.pop().unwrap().to_owned().to_string();
+
+      // data_dirs.push(out_dir.clone());
+
+      out_dir
+    } else { // if there are none, then create one
+      let out_dir = format!("{}/{}", self.data(), random_string());
+
+      self.create_data_folder(out_dir.to_owned().to_string());
+
+      // let mut data_dirs = Arc::clone(&DATA_DIRS);
+      // let mut data_dirs = data_dirs.lock().unwrap();
+
+      out_dir
+    };
+
+    data_dirs.push(out_dir.clone());
+    out_dir
   }
 
   pub fn password(&self) -> String {
@@ -126,4 +233,21 @@ impl JoinemConfig {
 ];
     items
   }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::config::JoinemConfig;
+    #[test]
+    fn it_works() {
+      // let config = JoinemConfig::new();
+      // let data_dir = config.find_or_create_data_folder();
+      // println!("YO: {}", data_dir);
+      // // assert!(config.data() == "".to_string());
+      //
+      // let data_dir = config.find_or_create_data_folder();
+      // println!("YO: {}", data_dir);
+      // //
+      // assert!(false);
+    }
 }

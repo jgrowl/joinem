@@ -8,6 +8,7 @@ extern crate config as base_config;
 mod config;
 mod amazon;
 mod webdriver;
+mod util;
 
 use fantoccini::{Client, Locator};
 use tokio::time::delay_for;
@@ -35,12 +36,33 @@ use std::{io, fs};
 
 extern crate ctrlc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+
+// #![feature(drop_types_in_const)]
+use std::sync::{Arc, Mutex, MutexGuard};
 
 lazy_static! {
     static ref JOINEM_CONFIG: JoinemConfig = JoinemConfig::new();
+
+    // WARNING: Using a global variable here to keep track of which chrome
+    // data dirs are currently in use. This is necessary because if we 
+    // don't we will have to copy the folder every time and then clean it up
+    // Using this global will allow us to just reuse the same folders
+    // between runs.
+    //
+    // WARNING: This will let cache become stale so may need to provide
+    // a way to clean cache. 
+    //
+    // WARNING: This will also cause problems if you ever want to reuse 
+    // a data dir while the program is already runnnig. This will have to 
+    // be managed.
+    // static ref DATA_DIRS: Arc<Mutex<Vec<String>>>
+      // = Arc::new(Mutex::new(Vec::new()));
+    static ref DATA_DIRS: Mutex<Vec<String>> = Mutex::new(vec![]);
 }
 
+pub fn get_data_dirs<'a>() -> MutexGuard<'a, Vec<String>> {
+        DATA_DIRS.lock().unwrap()
+}
 
 #[tokio::main]
 async fn main() -> Result<(), fantoccini::error::CmdError> {
