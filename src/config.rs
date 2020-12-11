@@ -59,48 +59,35 @@ impl JoinemConfig {
     // base_config.merge(File::new(&name, FileFormat::Toml).required(false)).unwrap();
 
     let settings =  settings.try_into::<HashMap<String, String>>().unwrap();
-    JoinemConfig { settings: settings }
+
+
+    let config = JoinemConfig { settings: settings };
+    std::fs::create_dir_all(config.data()).expect("Failed to create data directory!");
+    config
   }
 
   pub fn data(&self) -> String {
     self.settings.get("data").unwrap().clone()
   }
 
-  // pub fn next_available_data_dir(&mut self) -> String {
-  //   // let out_dir_base = self.data();
-  //   self.find_or_create_data_folder()
-  // }
-
   pub fn create_data_folder(&self, out_dir: String) {
     // std::fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
     // self.settings.get("data").unwrap().clone()
     // fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
-  fs::create_dir_all(&out_dir).expect("Failed to create directory!");
+    fs::create_dir_all(&out_dir).expect("Failed to create directory!");
 
+    let options = CopyOptions::new(); //Initialize default values for CopyOptions
+    // options.mirror_copy = true; // To mirror copy the whole structure of the source directory
+    //
 
-  let options = CopyOptions::new(); //Initialize default values for CopyOptions
-// options.mirror_copy = true; // To mirror copy the whole structure of the source directory
-//
-
-// copy source/dir1 to target/dir1
-// let default = "~/Library/Caches/Google/Chrome/Default";
-let default = self.chrome_user_data();
-debug!("Chrome user_data path set to {}", &default);
-// println!("{}", default);
-// let default = "/Users/jon/Library/Caches/Google/Chrome";
+    let default = self.chrome_user_data();
+    debug!("Chrome user_data path set to {}", &default);
 // copy(default, &out_dir, &options).expect("uho");
 //
-
-  // this actually copies
-  copy_dir_all(default, &out_dir).expect("Failed to copy chrome data dir");
-
-  // println!("outdir: {}", out_dir);
-  // copy_dir_all("~/Library/Caches/Google/Chrome/Default", out_dir);
-  //
+    copy_dir_all(default, &out_dir).expect("Failed to copy chrome data dir");
   }
 
-
-  pub fn find_or_create_data_folder(&self) -> String {
+  fn get_unused_data_dirs(&self) -> Vec<String> {
     // scan folder structure to see if any folders are there
     let paths = fs::read_dir(self.data()).unwrap();
     let paths: Vec<String> = paths.into_iter().map(|x| 
@@ -109,33 +96,40 @@ debug!("Chrome user_data path set to {}", &default);
 
     let b: HashSet<String> = paths.iter().cloned().collect();
 
-    // let mut data_dirs = Arc::clone(&DATA_DIRS);
-    // let mut data_dirs = data_dirs.lock().unwrap();
     let mut data_dirs = get_data_dirs();
 
     let a: HashSet<String> = data_dirs.clone().iter().cloned().collect();
 
     let diff1: HashSet<_> = a.symmetric_difference(&b).collect();
-    let mut v = Vec::from_iter(diff1.iter());
+    let mut v = Vec::from_iter(diff1.iter().map(|x| (*x).to_owned()));
+    v
+  }
+
+  pub fn find_or_create_data_folder(&self) -> String {
+    let mut v = self.get_unused_data_dirs();
 
     let out_dir = if v.len() > 0 {
       let out_dir= v.pop().unwrap().to_owned().to_string();
-
-      // data_dirs.push(out_dir.clone());
-
-      out_dir
+      debug!("Reusing data_dir `{}`", out_dir);
+      {
+        let mut data_dirs = get_data_dirs();
+        data_dirs.push(out_dir.clone());
+      }
+    out_dir
     } else { // if there are none, then create one
       let out_dir = format!("{}/{}", self.data(), random_string());
 
-      self.create_data_folder(out_dir.to_owned().to_string());
+    {
+      let mut data_dirs = get_data_dirs();
+      data_dirs.push(out_dir.clone());
+    }
 
-      // let mut data_dirs = Arc::clone(&DATA_DIRS);
-      // let mut data_dirs = data_dirs.lock().unwrap();
+      self.create_data_folder(out_dir.to_owned().to_string());
 
       out_dir
     };
 
-    data_dirs.push(out_dir.clone());
+
     out_dir
   }
 

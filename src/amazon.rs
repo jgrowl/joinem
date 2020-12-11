@@ -199,7 +199,7 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             }
               
             // confirm
-            debug!("{} BUY CONFIRMED!", url.0);
+            debug!("BUYCONFIRMED\t{}", url.0);
             confirm_buy_now(& mut c2).await;
 
             delay_for(Duration::from_secs(15)).await;
@@ -207,10 +207,10 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             process::exit(0x0100);
             break;
           } else {
-            debug!("{} Too Expensive!", url.0);
+            debug!("EXPENSIVE\t{}", url.0);
           }
         } else { 
-            debug!("{} Not in stock!", url.0);
+            debug!("NOSTOCK\t{}", url.0);
         }
 
           // info!("{}, cannot be bought now! Sleeping...", url.0);

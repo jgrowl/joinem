@@ -75,7 +75,7 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   }).expect("Error setting Ctrl-C handler");
 
   println!("Waiting for Ctrl-C...");
-  run_bots();
+  run_bots().await;
 
   while running.load(Ordering::SeqCst) { }
   println!("\nShutting down joinem!");
@@ -86,7 +86,7 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   Ok(())
 }
 
-fn run_bots() {
+async fn run_bots() {
     // let mut c = new_client().await.expect("Failed to create new client!");
     // if !is_logged_in_to_amazon(& mut c).await {
     //   info!("Not logged into Amazon.");
@@ -107,6 +107,15 @@ fn run_bots() {
       tokio::spawn(async move {
         check_amazon_item(item).await;
       });
+
+      // We have to wait because we are using a global variable in a
+      // multi-threaded app. If we don't do this then another thread 
+      // grab the chrome data directory before the thread that
+      // created it has a chance to register the name
+      //
+      // WARNING: Touching the data_dirs global will be dangerous!
+      //
+      delay_for(Duration::from_secs(1)).await
     }
 }
 
