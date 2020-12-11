@@ -37,7 +37,6 @@ use std::{io, fs};
 extern crate ctrlc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-// #![feature(drop_types_in_const)]
 use std::sync::{Arc, Mutex, MutexGuard};
 
 lazy_static! {
