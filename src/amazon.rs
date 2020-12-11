@@ -164,20 +164,20 @@ async fn confirm_buy_now(c: & mut Client) -> Result<(), fantoccini::error::CmdEr
 
 pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdError> {
     let mut c2 = new_client().await.expect("Failed to create new client!");
-    c2.goto(&url.2).await?;
+    c2.goto(&url.url).await?;
 
     loop {
         if is_buy_now_amazon(& mut c2).await {
           let price = scrape_price(& mut c2).await;
-          info!("{} can be bought now!", url.0);
-          if price <= url.1 {
-            info!("{} Price is good!", url.0);
+          info!("{} can be bought now!", url.name);
+          if price <= url.max_price {
+            info!("{} Price is good!", url.name);
 
 
             buy_now(& mut c2).await;
 
             // Reject coverage if offered!
-            info!("{} Rejecting coverage!", url.0);
+            info!("{} Rejecting coverage!", url.name);
             reject_coverage(& mut c2).await;
 
 
@@ -188,7 +188,7 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             let path = current_url.path();
 
             // "https://www.amazon.com/ap/signin"
-            info!("{} Logging in!", url.0);
+            info!("{} Logging in!", url.name);
             let sign_in_path = "/ap/signin";
             if path.eq(sign_in_path) {
               let search_form = c2.form(Locator::Css("form[name='signIn']")).await?;
@@ -199,7 +199,7 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             }
               
             // confirm
-            debug!("BUYCONFIRMED\t{}", url.0);
+            debug!("BUYCONFIRMED\t{}", url.name);
             confirm_buy_now(& mut c2).await;
 
             delay_for(Duration::from_secs(15)).await;
@@ -207,13 +207,13 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             process::exit(0x0100);
             break;
           } else {
-            debug!("EXPENSIVE\t{}", url.0);
+            debug!("EXPENSIVE\t{}", url.name);
           }
         } else { 
-            debug!("NOSTOCK\t{}", url.0);
+            debug!("NOSTOCK\t{}", url.name);
         }
 
-          // info!("{}, cannot be bought now! Sleeping...", url.0);
+          // info!("{}, cannot be bought now! Sleeping...", url.name);
           delay_for(Duration::from_secs(15)).await;
           c2.refresh().await;
     }

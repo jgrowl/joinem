@@ -106,7 +106,7 @@ async fn run_bots() -> Vec<BotType> {
     let mut spawns = vec![]; 
     for item in items.into_iter() {
       let the_item = item.clone();
-      debug!("Starting {:?}", item.0);
+      debug!("Starting {:?}", item.name);
       let spawn = tokio::spawn(async move {
         check_amazon_item(item.clone()).await;
       });
@@ -129,7 +129,7 @@ type BotType = (Item, tokio::task::JoinHandle<()>);
 fn cleanup(bots: Vec<BotType>) {
   for bot in bots {
     println!("Doin somethin");
-    // println!("Doin somethin for {}", bot.0);
+    // println!("Doin somethin for {}", bot.name);
   }
   // fs::remove_dir_all("/tmp/joinem").unwrap();
   // rm_rf::ensure_removed("/tmp/joinem").expect("couldn't delete");

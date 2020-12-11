@@ -18,7 +18,13 @@ use std::iter::FromIterator;
 // use crate::DATA_DIRS;
 use crate::get_data_dirs;
 
-pub type Item = (String, f32, String);
+// pub type Item = (String, f32, String);
+#[derive(Clone)]
+pub struct Item {
+  pub name: String, 
+  pub max_price: f32, 
+  pub url: String
+} 
 
 use std::sync::{Arc, Mutex};
 
@@ -193,36 +199,41 @@ impl JoinemConfig {
 
 
     let items: Vec<Item> = vec![
-(
- String::from("AMD Ryzen 5950X"), 
- 850f32, 
- String::from("https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N")
-)
+Item{
+ name: String::from("AMD Ryzen 5950X"), 
+ max_price: 850f32, 
+ url: String::from("https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N")
+},
 
-,(
- String::from("AMD Ryzen 5900X"),
- 600f32,
- String::from("https://www.amazon.com/AMD-Ryzen-5900X-24-Thread-Processor/dp/B08164VTWH")
-),
+Item{
+ name: String::from("AMD Ryzen 5900X"),
+ max_price: 600f32, 
+ url: String::from("https://www.amazon.com/AMD-Ryzen-5900X-24-Thread-Processor/dp/B08164VTWH")
+},
 
-(
-  String::from("Gigabyte 3080 AORUS-M"),
-  850f32,
-  String::from("https://www.amazon.com/Gigabyte-GeForce-Graphics-GV-N3080AORUS-M-10GD/dp/B08KJ3VKLQ")
-)
-,(
-  String::from("Gigabyte 3090 AORUS-X"),
-  1800f32,
-  String::from("https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-X-24GD/dp/B08KTWVHQP"))
-,(
-  String::from("Gigabyte 3090 AORUS-X"),
-  1800f32,
-  String::from("https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-M-24GD/dp/B08KTYZXR9"))
-,(
-  String::from("Gigabyte 3090 GAMING-OC"),
-  1800f32,
-  String::from("https://www.amazon.com/Gigabyte-Graphics-WINDFORCE-GV-N3090GAMING-OC-24GD/dp/B08HJRF2CN")
-)
+Item{
+ name: String::from("Gigabyte 3080 AORUS-M"),
+ max_price: 850f32, 
+ url: String::from("https://www.amazon.com/Gigabyte-GeForce-Graphics-GV-N3080AORUS-M-10GD/dp/B08KJ3VKLQ")
+},
+
+Item{
+ name: String::from("Gigabyte 3090 AORUS-X"),
+ max_price: 1800f32, 
+ url: String::from("https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-X-24GD/dp/B08KTWVHQP")
+},
+
+Item{
+ name: String::from("Gigabyte 3090 AORUS-X"),
+ max_price: 1800f32, 
+ url: String::from("https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-M-24GD/dp/B08KTYZXR9")
+},
+
+Item{
+ name: String::from("Gigabyte 3090 GAMING-OC"),
+ max_price: 1800f32, 
+ url: String::from("https://www.amazon.com/Gigabyte-Graphics-WINDFORCE-GV-N3090GAMING-OC-24GD/dp/B08HJRF2CN")
+}
 
 ];
     items
