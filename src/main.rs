@@ -75,18 +75,19 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   }).expect("Error setting Ctrl-C handler");
 
   println!("Waiting for Ctrl-C...");
-  run_bots().await;
+  let mut bots = run_bots().await;
+
 
   while running.load(Ordering::SeqCst) { }
   println!("\nShutting down joinem!");
 
-  cleanup();
+  cleanup(bots);
 
 
   Ok(())
 }
 
-async fn run_bots() {
+async fn run_bots() -> Vec<BotType> {
     // let mut c = new_client().await.expect("Failed to create new client!");
     // if !is_logged_in_to_amazon(& mut c).await {
     //   info!("Not logged into Amazon.");
@@ -102,11 +103,14 @@ async fn run_bots() {
     // check_amazon_item(url).await;
     let items = JOINEM_CONFIG.items();
 
+    let mut spawns = vec![]; 
     for item in items.into_iter() {
+      let the_item = item.clone();
       debug!("Starting {:?}", item.0);
-      tokio::spawn(async move {
-        check_amazon_item(item).await;
+      let spawn = tokio::spawn(async move {
+        check_amazon_item(item.clone()).await;
       });
+      spawns.push((the_item, spawn));
 
       // We have to wait because we are using a global variable in a
       // multi-threaded app. If we don't do this then another thread 
@@ -117,9 +121,16 @@ async fn run_bots() {
       //
       delay_for(Duration::from_secs(1)).await
     }
+
+    return spawns;
 }
 
-fn cleanup() {
+type BotType = (Item, tokio::task::JoinHandle<()>);
+fn cleanup(bots: Vec<BotType>) {
+  for bot in bots {
+    println!("Doin somethin");
+    // println!("Doin somethin for {}", bot.0);
+  }
   // fs::remove_dir_all("/tmp/joinem").unwrap();
   // rm_rf::ensure_removed("/tmp/joinem").expect("couldn't delete");
 }
