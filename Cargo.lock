@@ -891,6 +891,8 @@ dependencies = [
  "pretty_env_logger",
  "rand 0.7.3",
  "rm_rf",
+ "serde 1.0.118",
+ "serde_derive",
  "serde_json",
  "tokio",
  "warp",

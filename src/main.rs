@@ -40,7 +40,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 lazy_static! {
-    static ref JOINEM_CONFIG: JoinemConfig = JoinemConfig::new();
+	static ref JOINEM_CONFIG: JoinemConfig = {
+		let config = JoinemConfig::new();
+		config.unwrap()
+	};
 
     // WARNING: Using a global variable here to keep track of which chrome
     // data dirs are currently in use. This is necessary because if we 
@@ -101,7 +104,7 @@ async fn run_bots() -> Vec<BotType> {
 
     // let url = "https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N";
     // check_amazon_item(url).await;
-    let items = JOINEM_CONFIG.items();
+    let items = JOINEM_CONFIG.items.clone();
 
     let mut spawns = vec![]; 
     for item in items.into_iter() {

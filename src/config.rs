@@ -1,6 +1,6 @@
 
 use std::env;
-use base_config::{Config, File, FileFormat, Environment};
+use base_config::{Config, File, FileFormat, Environment, ConfigError};
 use std::collections::HashMap;
 use log::{info, warn, debug};
 use std::{io, fs};
@@ -18,8 +18,11 @@ use std::iter::FromIterator;
 // use crate::DATA_DIRS;
 use crate::get_data_dirs;
 
+
+use serde_derive::Deserialize;
+
 // pub type Item = (String, f32, String);
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct Item {
   pub name: String, 
   pub max_price: f32, 
@@ -29,8 +32,18 @@ pub struct Item {
 use std::sync::{Arc, Mutex};
 
 
+
+#[derive(Debug, Deserialize)]
 pub struct JoinemConfig {
-  settings: HashMap<String, String>,
+
+
+pub username: String ,
+pub password: String ,
+pub chrome_user_data: String, 
+pub data: String,
+pub items: Vec<Item>
+
+  // settings: HashMap<String, String>,
   // data_dirs: Vec<String>
 }
 // use std::ops::{DerefMut, Deref};
@@ -50,7 +63,8 @@ pub struct JoinemConfig {
 // }
 
 impl JoinemConfig {
-  pub fn new() -> JoinemConfig { 
+	pub fn new() -> Result<Self, ConfigError> {
+  // pub fn new() -> JoinemConfig {
 
   let mut settings = base_config::Config::default();
   settings
@@ -64,17 +78,14 @@ impl JoinemConfig {
     // let name = format!("Settings.{}", env::var("env").unwrap_or("development".into()));
     // base_config.merge(File::new(&name, FileFormat::Toml).required(false)).unwrap();
 
-    let settings =  settings.try_into::<HashMap<String, String>>().unwrap();
+    // let settings =  settings.try_into::<HashMap<String, String>>().unwrap();
 
+		// let data = settings.get::<String>("data").expect("Data directory must be set!");
+		// std::fs::create_dir_all(data).expect("Failed to create data directory!");
 
-    let config = JoinemConfig { settings: settings };
-    std::fs::create_dir_all(config.data()).expect("Failed to create data directory!");
-    config
+		settings.try_into()
   }
 
-  pub fn data(&self) -> String {
-    self.settings.get("data").unwrap().clone()
-  }
 
   pub fn create_data_folder(&self, out_dir: String) {
     // std::fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");
@@ -86,7 +97,7 @@ impl JoinemConfig {
     // options.mirror_copy = true; // To mirror copy the whole structure of the source directory
     //
 
-    let default = self.chrome_user_data();
+    let default = self.chrome_user_data.to_owned();
     debug!("Chrome user_data path set to {}", &default);
 // copy(default, &out_dir, &options).expect("uho");
 //
@@ -95,7 +106,7 @@ impl JoinemConfig {
 
   fn get_unused_data_dirs(&self) -> Vec<String> {
     // scan folder structure to see if any folders are there
-    let paths = fs::read_dir(self.data()).unwrap();
+    let paths = fs::read_dir(self.data.to_owned()).unwrap();
     let paths: Vec<String> = paths.into_iter().map(|x| 
       x.unwrap().path().to_str().to_owned().unwrap().to_owned()
     ).collect();
@@ -123,7 +134,7 @@ impl JoinemConfig {
       }
     out_dir
     } else { // if there are none, then create one
-      let out_dir = format!("{}/{}", self.data(), random_string());
+      let out_dir = format!("{}/{}", self.data.to_owned(), random_string());
 
     {
       let mut data_dirs = get_data_dirs();
@@ -138,112 +149,19 @@ impl JoinemConfig {
 
     out_dir
   }
-
-  pub fn password(&self) -> String {
-    self.settings.get("password").unwrap().clone()
-  }
-
-  pub fn username(&self) -> String {
-    self.settings.get("username").unwrap().clone()
-  }
-
-  pub fn chrome_user_data(&self) -> String {
-    self.settings.get("chrome_user_data").unwrap().clone()
-  }
-
-  pub fn newegg_items() {
-
-    // GIGABYTE AORUS GeForce RTX 3090 DirectX 12 GV-N3090AORUS M-24GD 24GB Video Card + GIGABYTE GP-P850GM 850W ATX 12V v2.31 80 PLUS GOLD Certified Active (>0.9 typical) PFC Power Supply
-    // 1,799.98
-    // https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190467
-    //
-    //
-    // GIGABYTE AORUS GeForce RTX 3090 DirectX 12 GV-N3090AORUS X-24GD 24GB 384-Bit GDDR6X PCI Express 4.0 x16 SLI Support ATX Video Card + GIGABYTE GP-P850GM 850W ATX Power Supply
-    // $1,899.98
-    // https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190485
-    //
-    //
-    // GIGABYTE AORUS GeForce RTX 3080 DirectX 12 GV-N3080AORUS X-10GD 10GB 320-Bit GDDR6X PCI Express 4.0 x16 ATX Video Card + GIGABYTE GP-P850GM 850W ATX Power Supply
-    // $999.98
-    // https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190483
-    //
-    // GIGABYTE AORUS GeForce RTX 3080 DirectX 12 GV-N3080AORUS M-10GD 10GB 320-Bit GDDR6X PCI Express 4.0 x16 ATX Video Card + GIGABYTE GP-P850GM 850W ATX Power Supply
-    // $949.98
-    // https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190361
-    //
-    // GIGABYTE GP-P850GM 850W ATX 12V v2.31 80 PLUS GOLD Certified Full Modular Active (>0.9 typical) PFC Power Supply + GIGABYTE AORUS GeForce RTX 3080 DirectX 12 GV-N3080AORUSX W-10GD 10GB 320-Bit GDDR6X PCI Express 4.0 x16 ATX Video Card
-    // $1,099.98
-    // https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4207165
-    //
-    // AMD Ryzen 9 5900X 12-Core 3.7 GHz Socket AM4 105W 100-100000061WOF Desktop Processor
-    // $549.99
-    // https://www.newegg.com/amd-ryzen-9-5900x/p/N82E16819113664
-    //
-    //AMD Ryzen 9 5950X 16-Core 3.4 GHz Socket AM4 105W 100-100000059WOF Desktop Processor
-    //$799.99
-    // https://www.newegg.com/amd-ryzen-9-5950x/p/N82E16819113663
-
-  }
-
-  pub fn items(&self) -> Vec<Item> {
-
-  // out of stock
-  // let url = "https://www.amazon.com/dp/B07XPC9B55/ref=twister_B08LYZMK9C?_encoding=UTF8&psc=1";
-
-  // coffee, it works!
-  // let url = "https://www.amazon.com/gp/product/B078TN99F9";
-
-  // subscribe and save test
-  // let url = "https://www.amazon.com/gp/product/B003SGHSCG?pf_rd_r=PJCXN2B304AV890R0GP2";
-  //
-
-
-    let items: Vec<Item> = vec![
-Item{
- name: String::from("AMD Ryzen 5950X"), 
- max_price: 850f32, 
- url: String::from("https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N")
-},
-
-Item{
- name: String::from("AMD Ryzen 5900X"),
- max_price: 600f32, 
- url: String::from("https://www.amazon.com/AMD-Ryzen-5900X-24-Thread-Processor/dp/B08164VTWH")
-},
-
-Item{
- name: String::from("Gigabyte 3080 AORUS-M"),
- max_price: 850f32, 
- url: String::from("https://www.amazon.com/Gigabyte-GeForce-Graphics-GV-N3080AORUS-M-10GD/dp/B08KJ3VKLQ")
-},
-
-Item{
- name: String::from("Gigabyte 3090 AORUS-X"),
- max_price: 1800f32, 
- url: String::from("https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-X-24GD/dp/B08KTWVHQP")
-},
-
-Item{
- name: String::from("Gigabyte 3090 AORUS-X"),
- max_price: 1800f32, 
- url: String::from("https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-M-24GD/dp/B08KTYZXR9")
-},
-
-Item{
- name: String::from("Gigabyte 3090 GAMING-OC"),
- max_price: 1800f32, 
- url: String::from("https://www.amazon.com/Gigabyte-Graphics-WINDFORCE-GV-N3090GAMING-OC-24GD/dp/B08HJRF2CN")
-}
-
-];
-    items
-  }
 }
 
 #[cfg(test)]
 mod tests {
   use crate::config::JoinemConfig;
     #[test]
+    fn it_works2() {
+			let config = JoinemConfig::new().unwrap();
+			let data_dir = config.items.to_owned().pop();
+			println!("YO: {:?}", data_dir);
+			assert!(config.data.to_owned() == "".to_string());
+    }
+
     fn it_works() {
       // let config = JoinemConfig::new();
       // let data_dir = config.find_or_create_data_folder();
@@ -255,4 +173,5 @@ mod tests {
       // //
       // assert!(false);
     }
+
 }

@@ -67,14 +67,14 @@ async fn amazon_login(c: & mut Client)  -> Result<(), fantoccini::error::CmdErro
     //
     let search_form = c.form(Locator::Css("form[name='signIn']")).await?;
     let mut search_input = c.find(Locator::Id("ap_email")).await?;
-    let username = JOINEM_CONFIG.username();
+    let username = JOINEM_CONFIG.username.to_owned();
     search_input.send_keys(&username).await?;
     search_form.submit().await?;
     // 
 
     let search_form = c.form(Locator::Css("form[name='signIn']")).await?;
     let mut search_input = c.find(Locator::Id("ap_password")).await?;
-    let password = JOINEM_CONFIG.password();
+    let password = JOINEM_CONFIG.password.to_owned();
     search_input.send_keys(&password).await?;
     search_form.submit().await?;
     ////
@@ -193,7 +193,7 @@ pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdEr
             if path.eq(sign_in_path) {
               let search_form = c2.form(Locator::Css("form[name='signIn']")).await?;
               let mut search_input = c2.find(Locator::Id("ap_password")).await?;
-              let password = JOINEM_CONFIG.password();
+              let password = JOINEM_CONFIG.password.to_owned();
               search_input.send_keys(&password).await?;
               search_form.submit().await?;
             }
