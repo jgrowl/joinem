@@ -80,8 +80,8 @@ impl JoinemConfig {
 
     // let settings =  settings.try_into::<HashMap<String, String>>().unwrap();
 
-		// let data = settings.get::<String>("data").expect("Data directory must be set!");
-		// std::fs::create_dir_all(data).expect("Failed to create data directory!");
+		let data = settings.get::<String>("data").expect("Data directory must be set!");
+		std::fs::create_dir_all(data).expect("Failed to create data directory!");
 
 		settings.try_into()
   }
