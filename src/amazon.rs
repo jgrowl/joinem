@@ -9,7 +9,7 @@ use std::process;
 use crate::JOINEM_CONFIG;
 use crate::config::Item;
 
-use crate::webdriver::new_client;
+// use crate::webdriver::new_client;
 
 async fn reject_coverage(c: & mut Client) {
   let no_coverage = c.find(Locator::Id("siNoCoverage-announce")).await;
@@ -162,16 +162,16 @@ async fn confirm_buy_now(c: & mut Client) -> Result<(), fantoccini::error::CmdEr
   Ok(())
 }
 
-pub async fn check_amazon_item(url: Item) -> Result<(), fantoccini::error::CmdError> {
-    let mut c2 = new_client().await.expect("Failed to create new client!");
+pub async fn check_amazon_item(mut c2: Client, url: Item) -> Result<(), fantoccini::error::CmdError> {
+    // let mut c2 = new_client().await.expect("Failed to create new client!");
     c2.goto(&url.url).await?;
 
     loop {
         if is_buy_now_amazon(& mut c2).await {
           let price = scrape_price(& mut c2).await;
-          info!("{} can be bought now!", url.name);
+          info!("AVAILABLE\t{}", url.name);
           if price <= url.max_price {
-            info!("{} Price is good!", url.name);
+            info!("AFFORDABLE\t{}", url.name);
 
 
             buy_now(& mut c2).await;

@@ -24,6 +24,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::config::{JoinemConfig, Item};
 use crate::amazon::check_amazon_item;
 
+use crate::webdriver::new_client;
+
 // use num_bigint::{ToBigInt, RandBigInt};
 // use num::traits::ToPrimitive;
 use bigdecimal::BigDecimal;
@@ -90,7 +92,7 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   Ok(())
 }
 
-async fn run_bots() -> Vec<BotType> {
+async fn run_bots() -> Vec<Bot> {
     // let mut c = new_client().await.expect("Failed to create new client!");
     // if !is_logged_in_to_amazon(& mut c).await {
     //   info!("Not logged into Amazon.");
@@ -111,9 +113,12 @@ async fn run_bots() -> Vec<BotType> {
       let the_item = item.clone();
       debug!("Starting {:?}", item.name);
       let spawn = tokio::spawn(async move {
-        check_amazon_item(item.clone()).await;
+
+				let client = new_client().await.expect("Failed to create new client!");
+
+        check_amazon_item(client, item.clone()).await;
       });
-      spawns.push((the_item, spawn));
+      spawns.push(Bot{item: the_item, handle: spawn});
 
       // We have to wait because we are using a global variable in a
       // multi-threaded app. If we don't do this then another thread 
@@ -128,10 +133,16 @@ async fn run_bots() -> Vec<BotType> {
     return spawns;
 }
 
-type BotType = (Item, tokio::task::JoinHandle<()>);
-fn cleanup(bots: Vec<BotType>) {
+struct Bot {
+	item: Item,
+	handle: tokio::task::JoinHandle<()>
+}
+
+fn cleanup(bots: Vec<Bot>) {
   for bot in bots {
     println!("Doin somethin");
+		let enter = bot.handle;
+		println!("{:?}", enter);
     // println!("Doin somethin for {}", bot.name);
   }
   // fs::remove_dir_all("/tmp/joinem").unwrap();
