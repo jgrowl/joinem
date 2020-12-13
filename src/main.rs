@@ -19,6 +19,8 @@ use std::time::{Duration};
 use std::path::Path;
 
 use log::{info, warn, debug};
+use log4rs;
+
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{JoinemConfig, Item};
@@ -59,8 +61,6 @@ lazy_static! {
     // WARNING: This will also cause problems if you ever want to reuse 
     // a data dir while the program is already runnnig. This will have to 
     // be managed.
-    // static ref DATA_DIRS: Arc<Mutex<Vec<String>>>
-      // = Arc::new(Mutex::new(Vec::new()));
     static ref DATA_DIRS: Mutex<Vec<String>> = Mutex::new(vec![]);
 }
 
@@ -70,7 +70,8 @@ pub fn get_data_dirs<'a>() -> MutexGuard<'a, Vec<String>> {
 
 #[tokio::main]
 async fn main() -> Result<(), fantoccini::error::CmdError> {
-  env_logger::init();
+  log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
+  // env_logger::init();
 
   let running = Arc::new(AtomicBool::new(true));
   let r = running.clone();
