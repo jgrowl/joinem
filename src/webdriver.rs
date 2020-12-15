@@ -27,7 +27,7 @@ pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
   let mut caps = serde_json::map::Map::new();
   let out_dir_arg = format!("--user-data-dir={}", out_dir);
   let mut args = vec!["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", &out_dir_arg];
-  args.push("--headless");
+  // args.push("--headless");
   
   let opts = serde_json::json!({
     "args": args,

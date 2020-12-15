@@ -1,9 +1,7 @@
-
-use std::env;
 use base_config::{Config, File, FileFormat, Environment, ConfigError};
 use std::collections::HashMap;
 use log::{info, warn, debug};
-use std::{io, fs};
+use std::{env, io, fs};
 use std::path::Path;
 
 extern crate fs_extra;
@@ -12,14 +10,13 @@ use fs_extra::dir::CopyOptions;
 use crate::util::{copy_dir_all, random_string};
 
 use std::fs::read_dir;
-
 use std::collections::HashSet;
 use std::iter::FromIterator;
-// use crate::DATA_DIRS;
-use crate::get_data_dirs;
-
+use std::sync::{Arc, Mutex};
 
 use serde_derive::Deserialize;
+
+use crate::get_data_dirs;
 
 // pub type Item = (String, f32, String);
 #[derive(Clone, Deserialize, Debug)]
@@ -29,22 +26,20 @@ pub struct Item {
   pub url: String
 } 
 
-use std::sync::{Arc, Mutex};
-
-
-
 #[derive(Debug, Deserialize)]
 pub struct JoinemConfig {
 
+  pub newegg_username: String,
+  pub newegg_password: String,
+  pub username: String,
+  pub password: String,
+  pub chrome_user_data: String, 
+  pub data: String,
+  pub items: Vec<Item>,
+  pub items2: Vec<Item>
 
-pub username: String ,
-pub password: String ,
-pub chrome_user_data: String, 
-pub data: String,
-pub items: Vec<Item>
-
-  // settings: HashMap<String, String>,
-  // data_dirs: Vec<String>
+    // settings: HashMap<String, String>,
+    // data_dirs: Vec<String>
 }
 // use std::ops::{DerefMut, Deref};
 //

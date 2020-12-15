@@ -5,8 +5,14 @@ appenders:
   amazon:
     kind: file
     path: "logs/amazon.log"
-    # encoder:
-    #   pattern: "{d} - {m}{n}"
+    encoder:
+      pattern: "{d(%Y/%m/%d %H:%M:%S)} {l} {m}{n}"
+  newegg:
+    kind: file
+    path: "logs/newegg.log"
+    encoder:
+      pattern: "{d(%Y/%m/%d %H:%M:%S)} {l} {m}{n}"
+
 root:
   level: warn
   appenders:
@@ -18,4 +24,9 @@ loggers:
     level: debug
     appenders:
       - amazon 
+    additive: false
+  joinem::newegg:
+    level: debug
+    appenders:
+      - newegg
     additive: false
