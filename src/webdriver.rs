@@ -39,7 +39,7 @@ pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
         // macOS
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
       } else if std::path::Path::new("C:/Program Files/Google/Application/chrome.exe").exists() {
-        std::path::Path::new("C:/Program Files/Google/Application/chrome.exe")
+        "C:/Program Files/Google/Application/chrome.exe"
       } else {
         // elsewhere, it's just called chromium
         "/usr/bin/chromium"
