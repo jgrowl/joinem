@@ -36,7 +36,10 @@ pub struct JoinemConfig {
   pub chrome_user_data: String, 
   pub data: String,
   pub items: Vec<Item>,
-  pub items2: Vec<Item>
+  pub items2: Vec<Item>,
+  pub args: Vec<String>,
+  pub chrome_bin: Option<String>
+
 
     // settings: HashMap<String, String>,
     // data_dirs: Vec<String>
@@ -79,6 +82,50 @@ impl JoinemConfig {
 		std::fs::create_dir_all(data).expect("Failed to create data directory!");
 
 		settings.try_into()
+  }
+
+  pub fn args(&self) -> Vec<String> {
+    self.args.clone()
+  }
+
+  pub fn chrome_bin(&self) -> String {
+    match self.chrome_bin.clone() {
+      Some(path) => path,
+      None => {
+        if std::path::Path::new("/usr/bin/chromium-browser").exists() {
+          // on Ubuntu, it's called chromium-browser
+          "/usr/bin/chromium-browser".to_owned()
+        } else if std::path::Path::new("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome").exists() {
+          // macOS
+          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome".to_owned()
+        } else if std::path::Path::new("C:/Program Files/Google/Application/chrome.exe").exists() {
+          "C:/Program Files/Google/Application/chrome.exe".to_owned()
+        } else {
+          // elsewhere, it's just called chromium
+          "/usr/bin/chromium".to_owned()
+        }
+      }
+    }
+  }
+
+  pub fn caps(&self, out_dir: &str) -> serde_json::Map<std::string::String, serde_json::Value> {
+  let mut args = self.args();
+
+  let mut caps = serde_json::map::Map::new();
+  let out_dir_arg = format!("--user-data-dir={}", out_dir);
+  let mut v = vec![out_dir_arg];
+  args.append(&mut v);
+  
+  let opts = serde_json::json!({
+    "args": args,
+    "binary": &self.chrome_bin()
+  });
+
+    caps.insert("goog:chromeOptions".to_string(), opts.clone());
+
+    // let caps = webdriver::capabilities::Capabilities::new()
+    caps
+
   }
 
 
