@@ -57,6 +57,8 @@ pub struct JoinemConfig {
   pub secure_checkout_selector: Option<String>,
   pub ec_frame_selector: Option<String>,
 
+  pub webdriver_url: Option<String>,
+
 
 
     // settings: HashMap<String, String>,
