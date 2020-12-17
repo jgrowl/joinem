@@ -29,6 +29,7 @@ pub struct Item {
 #[derive(Debug, Deserialize)]
 pub struct JoinemConfig {
   pub webdriver_url: Option<String>,
+  pub refresh_seconds: Option<u32>,
 
   pub newegg_username: String,
   pub newegg_password: String,
@@ -183,6 +184,10 @@ impl JoinemConfig {
     };
 
     out_dir
+  }
+
+  pub fn refresh_seconds(&self) -> u32 {
+    self.refresh_seconds.unwrap_or(15)
   }
 }
 
