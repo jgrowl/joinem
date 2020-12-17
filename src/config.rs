@@ -38,7 +38,25 @@ pub struct JoinemConfig {
   pub items: Vec<Item>,
   pub items2: Vec<Item>,
   pub args: Vec<String>,
-  pub chrome_bin: Option<String>
+  pub chrome_bin: Option<String>,
+  pub cvv: Option<String>,
+  pub card_number: Option<String>,
+
+  pub card_number_selector: Option<String>,
+  pub cvv_selector: Option<String>,
+  pub username_selector: Option<String>,
+  pub password_selector: Option<String>,
+  pub survey_selector: Option<String>,
+  pub sign_in_submit_selector: Option<String>,
+  pub insurance_selector: Option<String>,
+  pub promotion_selector: Option<String>,
+  pub continue_to_payment_selector: Option<String>,
+  pub save_selector: Option<String>,
+  pub view_cart_selector: Option<String>,
+  pub add_to_cart_selector: Option<String>,
+  pub secure_checkout_selector: Option<String>,
+  pub ec_frame_selector: Option<String>,
+
 
 
     // settings: HashMap<String, String>,
@@ -125,9 +143,7 @@ impl JoinemConfig {
 
     // let caps = webdriver::capabilities::Capabilities::new()
     caps
-
   }
-
 
   pub fn create_data_folder(&self, out_dir: String) {
     // std::fs::create_dir_all(&out_dir_base).expect("Failed to create directory!");

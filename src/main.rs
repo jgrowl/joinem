@@ -26,7 +26,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{JoinemConfig, Item};
 use crate::amazon::check_amazon_item;
-use crate::newegg::{check_newegg_item, newegg_login, is_logged_in, newegg_buy, newegg_confirm, reject_coverage, newegg_purchase, newegg_utag_data, newegg_login_at_checkout};
+use crate::newegg::{Bot};
 
 use crate::webdriver::new_client;
 
@@ -73,7 +73,6 @@ pub fn get_data_dirs<'a>() -> MutexGuard<'a, Vec<String>> {
 #[tokio::main]
 async fn main() -> Result<(), fantoccini::error::CmdError> {
   log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
-  // env_logger::init();
 
   let running = Arc::new(AtomicBool::new(true));
   let r = running.clone();
@@ -84,10 +83,10 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
 
   println!("Waiting for Ctrl-C...");
   // Amazon
-	let mut bots = run_bots().await;
+	// let mut bots = run_amazon().await;
 
   // Newegg
-	// let mut bots = run_bots2().await;
+  let mut bots = run_newegg().await;
 
   while running.load(Ordering::SeqCst) { }
   println!("\nShutting down joinem!");
@@ -97,7 +96,7 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   Ok(())
 }
 
-async fn run_bots2() -> Vec<Bot> {
+async fn run_newegg() -> Vec<Bot2> {
   let items = JOINEM_CONFIG.items2.clone();
 
   let mut spawns = vec![]; 
@@ -106,73 +105,49 @@ async fn run_bots2() -> Vec<Bot> {
     debug!("Starting {:?}", item.name);
     let spawn = tokio::spawn(async move {
       let mut client = new_client().await.expect("Failed to create new client!");
+      client.goto(&item.url.clone()).await;
+      // delay_for(Duration::from_secs(2)).await;
+
       loop {
-				client.goto(&item.url.clone()).await;
-				delay_for(Duration::from_secs(2)).await;
-
-				// let utag_data = newegg_utag_data(&mut client).await;
-				// panic!("UTAG_DATA: {:?}", utag_data);
-
-
-        if (!is_logged_in(&mut client).await) {
-          newegg_login(&mut client).await;
-          delay_for(Duration::from_secs(3)).await;
+        let mut bot = Bot{client: &mut client, item: item.clone()};
+        let mut clickable = bot.auto(item.clone()).await;
+        if clickable.is_err() {
+            warn!("NEWEGGCLIENTERROR\t{}", item.name);
         }
 
-        // popup-close
-// window.utag_data
-
-				
-
-        if check_newegg_item(&mut client, item.clone()).await.expect("Failed") {
+        let clickable = clickable.unwrap();
+        if clickable.is_some() {
+          // debug!("NEWEGGCLICK\t{}", item.name);
+          clickable.unwrap().click().await;
           delay_for(Duration::from_secs(3)).await;
-          newegg_buy(&mut client).await;
-          delay_for(Duration::from_secs(3)).await;
+          continue;
+        } 
 
-					reject_coverage(&mut client).await;
-          delay_for(Duration::from_secs(3)).await;
-
-          newegg_confirm(&mut client).await;
-          delay_for(Duration::from_secs(3)).await;
-
-					reject_coverage(&mut client).await;
-          delay_for(Duration::from_secs(3)).await;
-
-					// last confirm
-					newegg_purchase(&mut client).await;
-
-          delay_for(Duration::from_secs(3)).await;
-
-// https://secure.newegg.com/identity/signin?tk=b1d78221d7df494ca867dd2a63bb2ed618183
-					newegg_login_at_checkout(&mut client).await;
-
-					// shipping page
-					// button.btn-primary
-
-// <input type="text" class="form-text mask-cvv-4" aria-label="Security code" placeholder="CVV2" value="">
-
-// <button type="button" class="btn btn-primary checkout-step-action-done layout-quarter">Review your order</button>
-
-					info!("PURCHASED {}", item.name);
-
+        // TODO: Needs stop condition
+        // check url
+        if false {
+          info!("NEWEGGPURCHASED {}", item.name);
           delay_for(Duration::from_secs(25)).await;
-          // TODO: For now just exit if one is successful
-          process::exit(0x0100);
+          break;
         }
 
+        // debug!("NEWEGGSLEEP\t{}", item.name);
         delay_for(Duration::from_secs(15)).await;
         client.refresh().await;
       }
 
       client.close().await;
+
+      // TODO: For now just exit if one is successful
+      process::exit(0x0100);
     });
 
-    spawns.push(Bot{item: the_item, handle: spawn});
+    spawns.push(Bot2{item: the_item, handle: spawn});
   }
   spawns
 }
 
-async fn run_bots() -> Vec<Bot> {
+async fn run_amazon() -> Vec<Bot2> {
   // let mut c = new_client().await.expect("Failed to create new client!");
   // if !is_logged_in_to_amazon(& mut c).await {
   //   info!("Not logged into Amazon.");
@@ -198,7 +173,7 @@ async fn run_bots() -> Vec<Bot> {
 
       check_amazon_item(client, item.clone()).await;
     });
-    spawns.push(Bot{item: the_item, handle: spawn});
+    spawns.push(Bot2{item: the_item, handle: spawn});
 
     // We have to wait because we are using a global variable in a
     // multi-threaded app. If we don't do this then another thread 
@@ -213,12 +188,12 @@ async fn run_bots() -> Vec<Bot> {
   return spawns;
 }
 
-struct Bot {
+struct Bot2 {
   item: Item,
   handle: tokio::task::JoinHandle<()>
 }
 
-async fn cleanup(bots: Vec<Bot>) {
+async fn cleanup(bots: Vec<Bot2>) {
   for bot in bots {
     println!("Doin somethin");
     // let enter = bot.handle;
