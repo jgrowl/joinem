@@ -133,7 +133,7 @@ async fn run_newegg() -> Vec<Bot2> {
 
         // debug!("NEWEGGSLEEP\t{}", item.name);
         let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
-        delay_for(Duration::from_secs(15)).await;
+        delay_for(Duration::from_secs(refresh_seconds)).await;
         client.refresh().await;
       }
 
