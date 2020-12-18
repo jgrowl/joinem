@@ -29,7 +29,7 @@ pub struct Item {
 #[derive(Debug, Deserialize)]
 pub struct JoinemConfig {
   pub webdriver_url: Option<String>,
-  pub refresh_seconds: Option<u32>,
+  pub refresh_seconds: Option<u64>,
 
   pub newegg_username: String,
   pub newegg_password: String,
@@ -58,12 +58,20 @@ pub struct JoinemConfig {
   pub add_to_cart_selector: Option<String>,
   pub secure_checkout_selector: Option<String>,
   pub ec_frame_selector: Option<String>,
+
+
+  pub linux_chrome_bin_default: String,
+  pub macos_chrome_bin_default: String,
+  pub windows_chrome_bin_default: String, 
+  pub other_chrome_bin_default: String, 
+
 }
 
 impl JoinemConfig {
   pub fn new() -> Result<Self, ConfigError> {
     let mut settings = base_config::Config::default();
     settings
+      .merge(base_config::File::with_name("Default"))?
       // Add in `./Settings.toml`
       .merge(base_config::File::with_name("Joinem").required(false)).unwrap()
       // Add in settings from the environment (with a prefix of APP)
@@ -87,41 +95,27 @@ impl JoinemConfig {
   }
 
   pub fn chrome_bin(&self) -> String {
+    if self.chrome_bin.is_some() {
+      return self.chrome_bin.clone().unwrap().to_owned()
+    }
+
     match self.chrome_bin.clone() {
       Some(path) => path,
       None => {
-        if std::path::Path::new("/usr/bin/chromium-browser").exists() {
+        if std::path::Path::new(&self.linux_chrome_bin_default).exists() {
           // on Ubuntu, it's called chromium-browser
-          "/usr/bin/chromium-browser".to_owned()
-        } else if std::path::Path::new("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome").exists() {
+          self.linux_chrome_bin_default.to_owned()
+        } else if std::path::Path::new(&self.macos_chrome_bin_default).exists() {
           // macOS
-          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome".to_owned()
-        } else if std::path::Path::new("C:/Program Files/Google/Application/chrome.exe").exists() {
-          "C:/Program Files/Google/Application/chrome.exe".to_owned()
+          self.macos_chrome_bin_default.to_owned()
+        } else if std::path::Path::new(&self.windows_chrome_bin_default).exists() {
+            self.windows_chrome_bin_default.to_owned()
         } else {
           // elsewhere, it's just called chromium
-          "/usr/bin/chromium".to_owned()
+          self.other_chrome_bin_default.to_owned()
         }
       }
     }
-  }
-
-  pub fn caps(&self, out_dir: &str) -> serde_json::Map<std::string::String, serde_json::Value> {
-    let mut args = self.args();
-
-    let mut caps = serde_json::map::Map::new();
-    let out_dir_arg = format!("--user-data-dir={}", out_dir);
-    let mut v = vec![out_dir_arg];
-    args.append(&mut v);
-
-    let opts = serde_json::json!({
-      "args": args,
-      "binary": &self.chrome_bin()
-    });
-
-    caps.insert("goog:chromeOptions".to_string(), opts.clone());
-
-    caps
   }
 
   pub fn create_data_folder(&self, out_dir: String) {
@@ -186,8 +180,8 @@ impl JoinemConfig {
     out_dir
   }
 
-  pub fn refresh_seconds(&self) -> u32 {
-    self.refresh_seconds.unwrap_or(15)
+  pub fn refresh_seconds(&self) -> u64 {
+    self.refresh_seconds.unwrap_or(15u64)
   }
 }
 

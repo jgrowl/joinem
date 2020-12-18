@@ -1,0 +1,32 @@
+chrome_user_data = "~/Library/Caches/Google/Chrome"
+chrome_user_data_mac_default = "~/Library/Caches/Google/Chrome"
+data = "tmp"
+webdriver_url = "http://localhost:9515"
+refresh_seconds = 15
+
+cvv_selector = "input[type='text'].mask-cvv-4"
+username_selector = "labeled-input-signEmail"
+password_selector = "labeled-input-password"
+survey_selector = "a.centerPopup-trigger-close"
+sign_in_submit_selector = "#signInSubmit"
+insurance_selector = "div[role='dialog'] div[role='document'] div button[data-dismiss='modal']"
+promotion_selector = "div[role='dialog'] div[role='document'] div div div button[data-dismiss='modal']"
+continue_to_payment_selector = "div[data-status='add'] button.btn-primary"
+view_cart_selector = "button[title='View Cart & Checkout'].btn-primary"
+add_to_cart_selector = "div#ProductBuy button.btn-primary"
+secure_checkout_selector = "form div.summary-actions button.btn-primary" 
+ec_frame_selector = "iframe[title='ec_payment']"
+card_number_selector = "input[type='text'].mask-cardnumber"
+save_selector = "button.btn-primary"
+
+args = [
+  "--disable-gpu", 
+  "--no-sandbox", 
+  "--disable-dev-shm-usage", 
+#"--headless"
+]
+
+linux_chrome_bin_default = "/usr/bin/chromium-browser"
+macos_chrome_bin_default = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+windows_chrome_bin_default = "C:/Program Files/Google/Application/chrome.exe"
+other_chrome_bin_default = "/usr/bin/chromium"
