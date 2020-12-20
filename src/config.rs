@@ -38,7 +38,7 @@ pub struct JoinemConfig {
   pub chrome_user_data: String, 
   pub data: String,
   pub items: Vec<Item>,
-  pub items2: Vec<Item>,
+  pub newegg_items: Vec<Item>,
   pub args: Vec<String>,
   pub chrome_bin: Option<String>,
   pub cvv: Option<String>,

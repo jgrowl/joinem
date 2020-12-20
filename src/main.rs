@@ -99,7 +99,7 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
 }
 
 async fn run_newegg() -> Vec<Bot2> {
-  let items = JOINEM_CONFIG.items2.clone();
+  let items = JOINEM_CONFIG.newegg_items.clone();
 
   let mut spawns = vec![]; 
   for item in items.into_iter() {
