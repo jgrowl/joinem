@@ -1,8 +1,17 @@
+# disclaimer
+
+I am not responsible for how you use this. You probably shouldn't.
+I cannot gaurantee that you will not get banned from any services or
+over purchase items that you cannot afford. I cannot gaurantee your 
+personal information will not be comprimised by a bug an adulterated 
+version of this software. Use this at your own risk!
+
+
 # run
 
 get and run [chromedriver](#chromedriver)
 
-[set items and congiguration](#config)
+[set items and configuration](#config)
 
 [//]: # (build binary and make instructions)
 run [cargo](#cargo)
