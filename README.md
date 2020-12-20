@@ -13,7 +13,7 @@ Scalpers are not welcome to use this software. This is to level the field.
 
 # Joinem
 
-### A configurable bot that automatically buys items from newegg and amazon
+### A configurable bot :robot: that automatically buys items from newegg and amazon
 
 > If you can't beat the em... Joinem
 
@@ -71,7 +71,7 @@ the item is out of stock. With amazon the item will need to refresh and
 resubmit the form until out of stock for example.
 
 Below are a list of things that really should work before this is anywhere
-near safe to run. Green items should roughly work, but red are known
+near safe to run. Checked items should roughly work, but unchecked are known
 issues that will cause failure loops or keep buying over and over.
 
 This list will probably grow:
