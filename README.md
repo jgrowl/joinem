@@ -53,24 +53,24 @@ This list will probably grow:
 ## amazon
 
 - :white_check_mark: purchases highly-available items 
-- :x: purchases low-availability items (ie. 3080)
-- :x: knows to refresh and submit form on amazon until out of stock 
-- :x: reworked logic to be stateless 
+- :ballot_box_with_check: purchases low-availability items (ie. 3080)
+- :ballot_box_with_check: knows to refresh and submit form on amazon until out of stock 
+- :ballot_box_with_check: reworked logic to be stateless 
 
 ## newegg
 
 - :white_check_mark: purchases highly-available items 
-- :x: purchases low-availability items (ie. 3080)
-- :x: knows when to stop after successful purchase 
+- :ballot_box_with_check: j:x: purchases low-availability items (ie. 3080)
+- :ballot_box_with_check: :x: knows when to stop after successful purchase 
 
 # future
 
 ## general
 
-- :x:  adds browser-based ui 
-- :x:  adds remote control 
-- :x:  adds un-logged-in remote communication 
-- :x:  provides better logging
+- :ballot_box_with_check: adds browser-based ui 
+- :ballot_box_with_check: adds remote control 
+- :ballot_box_with_check: adds un-logged-in remote communication 
+- :ballot_box_with_check: provides better logging
 
 # dev platform
 
