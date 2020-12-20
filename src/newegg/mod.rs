@@ -10,9 +10,9 @@ use async_std::future;
 use fantoccini::{Client, Locator, Element};
 
 use crate::config::Item;
+use crate::types::ElementResult;
 use crate::JOINEM_CONFIG;
 
-type ElementResult = Result<Option<Element>, fantoccini::error::CmdError>;
 
 pub struct Bot<'a> {
   pub client: &'a mut Client,
@@ -268,8 +268,6 @@ impl <'a> Bot<'a> {
     let current_url = self.client.current_url().await?;
     let path = current_url.path();
 
-    //https://secure.newegg.com/Shopping/CheckoutStep3.aspx?CartID=551%2BZ46AWERMPCE8BHW18271&SONumbers=496013711&nsf=1&vtd=1
-
     // Check if this is neccessary. Put it here because element wasns't
     // showing up unless scrolled down, but it might have been a problem
     // with find vs findall where I was only getting the first element
@@ -400,6 +398,7 @@ impl <'a> Bot<'a> {
       // Review your order
   }
 }
+
 
 // use url::{Url, ParseError};
 #[cfg(test)]

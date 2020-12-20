@@ -5,6 +5,7 @@ extern crate lazy_static;
 
 extern crate config as base_config;
 
+mod types;
 mod config;
 mod amazon;
 mod newegg;
@@ -25,6 +26,7 @@ use log4rs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{JoinemConfig, Item};
+use crate::types::ElementResult;
 use crate::amazon::check_amazon_item;
 use crate::newegg::{Bot};
 
@@ -106,7 +108,6 @@ async fn run_newegg() -> Vec<Bot2> {
     let spawn = tokio::spawn(async move {
       let mut client = new_client().await.expect("Failed to create new client!");
       client.goto(&item.url.clone()).await;
-      // delay_for(Duration::from_secs(2)).await;
 
       loop {
         let mut bot = Bot{client: &mut client, item: item.clone()};
