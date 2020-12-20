@@ -28,7 +28,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::config::{JoinemConfig, Item};
 use crate::types::ElementResult;
 use crate::amazon::check_amazon_item;
-use crate::newegg::{Bot};
+use crate::newegg::{Bot as NeweggBot};
 
 use crate::webdriver::new_client;
 
@@ -107,10 +107,9 @@ async fn run_newegg() -> Vec<Bot2> {
     debug!("Starting {:?}", item.name);
     let spawn = tokio::spawn(async move {
       let mut client = new_client().await.expect("Failed to create new client!");
-      client.goto(&item.url.clone()).await;
+      let mut bot = NeweggBot::new(client, item.clone()).await;
 
       loop {
-        let mut bot = Bot{client: &mut client, item: item.clone()};
         let mut clickable = bot.auto(item.clone()).await;
         if clickable.is_err() {
             warn!("NEWEGGCLIENTERROR\t{}", item.name);
@@ -132,13 +131,12 @@ async fn run_newegg() -> Vec<Bot2> {
           break;
         }
 
-        // debug!("NEWEGGSLEEP\t{}", item.name);
         let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
         delay_for(Duration::from_secs(refresh_seconds)).await;
-        client.refresh().await;
+        bot.refresh().await;
       }
 
-      client.close().await;
+      bot.close().await;
 
       // TODO: For now just exit if one is successful
       process::exit(0x0100);

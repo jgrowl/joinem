@@ -14,13 +14,35 @@ use crate::types::ElementResult;
 use crate::JOINEM_CONFIG;
 
 
-pub struct Bot<'a> {
-  pub client: &'a mut Client,
+// pub struct Bot<'a> {
+pub struct Bot {
+  // pub client: &'a mut Client,
+  pub client: Client,
   pub item: Item
 }
 
 
-impl <'a> Bot<'a> {
+// impl <'a> Bot<'a> {
+impl Bot {
+
+  pub async fn new(client: Client, item: Item) -> Bot {
+    let mut bot = Bot{client, item};
+    bot.goto().await;
+
+    bot
+  }
+
+  pub async fn goto(&mut self) {
+      self.client.goto(&self.item.url.clone()).await;
+  }
+
+  pub async fn close(&mut self) {
+      self.client.close().await;
+  }
+
+  pub async fn refresh(&mut self) {
+      self.client.refresh().await;
+  }
 
   pub async fn get_card_number_el_and_try_fill(&mut self) -> Option<Element> {
     // <input type="text" class="form-text is-wide mask-cardnumber" aria-label="Card Number" value="">
