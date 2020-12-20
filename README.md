@@ -27,6 +27,20 @@ important that the correct address and credit card is selected.
 
 [set items and other configuration](#config)
 
+# setup chrome data directories 
+
+This is a work around for an annoying bug that I have to fix and it will
+go away in the future. A copy (per bot) of your chrome data directory 
+needs to be added to your JOINEM_DATA folder. This is set to a folder 
+named `joinem_data` in the executable directory. 
+
+Basically copy `~/Library/Caches/Google/Chrome` to `joinem_data` 10 times 
+if you want the bot monitoring 10 different items.
+
+You must login to the site you are botting before copying these directories.
+These folders have your site cookies/cache and are what allow the bots
+to be logged in without having to sign in every time for each one.
+
 # run
 
 get and run [chromedriver](#chromedriver)
@@ -50,6 +64,10 @@ issues that will cause failure loops or keep buying over and over.
 
 This list will probably grow:
 
+## general
+
+- :ballot_box_with_check: fix chrome data directory failures
+
 ## amazon
 
 - :white_check_mark: purchases highly-available items 
@@ -72,17 +90,19 @@ This list will probably grow:
 - :ballot_box_with_check: adds un-logged-in remote communication 
 - :ballot_box_with_check: provides better logging
 
-# dev platform
+# dev run
 
-Only tested on:
+Tested on:
+
+` Windows 10 Pro`
+
+and
 
 ```
 macOS Catalina 
 stable-x86_64-apple-darwin (default)
 rustc 1.48.0 (7eac88abb 2020-11-16)
 ```
-
-# dev run
 
 ## requirements
 
