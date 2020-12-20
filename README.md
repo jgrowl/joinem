@@ -1,3 +1,6 @@
+:warning: This project is not in a safe state to run if you do not 
+know what you are doing :warning: 
+
 # disclaimer
 
 I am not responsible for how you use this. You probably shouldn't.
@@ -16,16 +19,32 @@ This requires being able to skip advertisements, surveys, insurance offers,
 etc. The bot will use all default options set on each site so it is
 important that the correct address and credit card is selected.
 
+# configure
+
+[set items and other configuration](#config)
+
 # run
 
 get and run [chromedriver](#chromedriver)
-
-[set items and configuration](#config)
 
 [//]: # (build binary and make instructions)
 run [cargo](#cargo)
 
 # current state
+
+Things are pretty rough right now. Many things probably don't work right.
+Basically the app can buy regular items from stores, but actually getting
+a 3080 would probably fail badly. Logic needs to be added that will figure 
+out if something went wrong. Specifically when an item purchase is attempted
+but the item does not actually go in the cart or a message pops up that says
+the item is out of stock. With amazon the item will need to refresh and 
+resubmit the form until out of stock for example.
+
+Below are a list of things that really should work before this is anywhere
+near safe to run. Green items should roughly work, but red are known
+issues that will cause failure loops or keep buying over and over.
+
+This list will probably grow:
 
 ## amazon
 
@@ -39,6 +58,15 @@ run [cargo](#cargo)
 - :white_check_mark: purchases uncontested items 
 - :x: purchases contested items 
 - :x: knows when to stop after successful purchase 
+
+# future
+
+## general
+
+- :x:  adds browser-based ui 
+- :x:  adds remote control 
+- :x:  adds un-logged-in remote communication 
+- :x:  provides better logging
 
 # dev platform
 
