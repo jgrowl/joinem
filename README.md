@@ -1,9 +1,13 @@
 <p align="center">
 :warning: This project is NOT in a safe state to run if you do not 
 know what you are doing :warning: 
+</p>
 
+<p align="center">
 :no_entry: No Scalpers! :no_entry:
+</p>
 
+<p align="center">
 Scalpers are not welcome to use this software. This is to level the field.
 </p>
 
