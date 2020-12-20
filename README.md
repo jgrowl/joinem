@@ -35,11 +35,11 @@ run [cargo](#cargo)
 
 Only tested on:
 
-`macOS Catalina 
+```macOS Catalina 
 
 stable-x86_64-apple-darwin (default)
 
-rustc 1.48.0 (7eac88abb 2020-11-16)`
+rustc 1.48.0 (7eac88abb 2020-11-16)```
 
 # dev run
 
