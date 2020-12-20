@@ -1,6 +1,6 @@
 chrome_user_data = "~/Library/Caches/Google/Chrome"
 chrome_user_data_mac_default = "~/Library/Caches/Google/Chrome"
-data = "tmp"
+data = "joinem_data"
 webdriver_url = "http://localhost:9515"
 refresh_seconds = 15
 

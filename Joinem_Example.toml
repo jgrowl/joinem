@@ -4,93 +4,77 @@ chrome_user_data = "~/Library/Caches/Google/Chrome"
 data = "/tmp/joinem"
 newegg_username = "newegg_username"
 newegg_password = "newegg_password"
+cvv = "000"
+card_number = "55555555555555"
 
-[[items]]
-name = "AMD Ryzen 5950X"
-url = "https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N"
-max_price = 850
+#[[items]]
+#name = "AMD Ryzen 5950X"
+#url = "https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N"
+#max_price = 850
 
-[[items]]
-name = "AMD Ryzen 5900X"
-url =" https://www.amazon.com/AMD-Ryzen-5900X-24-Thread-Processor/dp/B08164VTWH"
-max_price = 600
+#[[items]]
+#name = "AMD Ryzen 5900X"
+#url =" https://www.amazon.com/AMD-Ryzen-5900X-24-Thread-Processor/dp/B08164VTWH"
+#max_price = 600
 
-[[items]]
-name = "Gigabyte 3080 AORUS-M"
-url = "https://www.amazon.com/Gigabyte-GeForce-Graphics-GV-N3080AORUS-M-10GD/dp/B08KJ3VKLQ"
-max_price = 850
+#[[items]]
+#name = "Gigabyte 3080 AORUS-M"
+#url = "https://www.amazon.com/Gigabyte-GeForce-Graphics-GV-N3080AORUS-M-10GD/dp/B08KJ3VKLQ"
+#max_price = 850
 
-[[items]]
-name = "Gigabyte 3090 AORUS-X"
-url ="https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-X-24GD/dp/B08KTWVHQP"
-max_price = 1800
+#[[items]]
+#name = "Gigabyte 3090 AORUS-X"
+#url ="https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-X-24GD/dp/B08KTWVHQP"
+#max_price = 1800
 
-[[items]]
-name = "Gigabyte 3090 AORUS-M"
-url = "https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-M-24GD/dp/B08KTYZXR9"
-max_price = 1800
+#[[items]]
+#name = "Gigabyte 3090 AORUS-M"
+#url = "https://www.amazon.com/GIGABYTE-GeForce-Graphics-GV-N3090AORUS-M-24GD/dp/B08KTYZXR9"
+#max_price = 1800
 
-[[items]]
-name = "Gigabyte 3090 GAMING-OC"
-url ="https://www.amazon.com/Gigabyte-Graphics-WINDFORCE-GV-N3090GAMING-OC-24GD/dp/B08HJRF2CN"
-max_price = 1800
-
-# out of stock
-# let url = "https:#www.amazon.com/dp/B07XPC9B55/ref=twister_B08LYZMK9C?_encoding=UTF8&psc=1";
-
-# coffee, it works!
-# let url = "https:#www.amazon.com/gp/product/B078TN99F9";
-
-# subscribe and save test
-# let url = "https:#www.amazon.com/gp/product/B003SGHSCG?pf_rd_r=PJCXN2B304AV890R0GP2";
-
-
-
-#window.utag_data
-[[items2]]
-name = "BONUS ITEM"
-url = "https://www.newegg.com/p/0GA-0105-00040?Item=9SIACD5CS57992&Description=combo&cm_re=combo-_-9SIACD5CS57992-_-Product&cm_sp=SP-_-362444-_-0-_-2-_-9SIACD5CS57992-_-combo-_-combo-_-18"
-max_price = 29
-
+#[[items]]
+#name = "Gigabyte 3090 GAMING-OC"
+#url ="https://www.amazon.com/Gigabyte-Graphics-WINDFORCE-GV-N3090GAMING-OC-24GD/dp/B08HJRF2CN"
+#max_price = 1800
 
 ## 1,799.98
-#[[items2]]
+#[[newegg_items]]
 #name = "GV-N3090AORUSM-24GD + GP-P850GM"
 #url = "https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190467"
 #max_price = 1800
 
 ## $1,899.98
-#[[items2]]
+#[[newegg_items]]
 #name = "GIGABYTE AORUS GeForce RTX 3090 GV-N3090AORUS X-24GD + GIGABYTE GP-P850GM 850W"
 #url = "https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190485"
 #max_price = 1900
 
 ## $999.98
-#[[items2]]
+#[[newegg_items]]
 #name = "GIGABYTE AORUS GeForce RTX 3080 GV-N3080AORUS X-10GD + GIGABYTE GP-P850GM 850W"
 #url = "https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190483"
 #max_price = 1000
 
 ## $949.98
-#[[items2]]
+#[[newegg_items]]
 #name = "GIGABYTE AORUS GeForce RTX 3080 GV-N3080AORUS M-10GD + GIGABYTE GP-P850GM 850W"
 #url = "https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190361"
 #max_price = 950
 
 ## $1,099.98
-#[[items2]]
+#[[newegg_items]]
 #name = "GIGABYTE AORUS GeForce RTX 3080 GV-N3080AORUSX + GIGABYTE GP-P850GM 850W"
 #url = "https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4207165"
 #max_price = 1100
 
 ## $549.99
-#[[items2]]
+#[[newegg_items]]
 #name = "AMD Ryzen 9 5900X"
 #url = "https://www.newegg.com/amd-ryzen-9-5900x/p/N82E16819113664"
 #max_price = 550
 
 ##$799.99
-#[[items2]]
+#[[newegg_items]]
 #name = "AMD Ryzen 9 5950X"
 #url = "https://www.newegg.com/amd-ryzen-9-5950x/p/N82E16819113663"
 #max_price = 800

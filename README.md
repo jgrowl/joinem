@@ -6,6 +6,15 @@ over purchase items that you cannot afford. I cannot gaurantee your
 personal information will not be comprimised by a bug or an adulterated 
 version of this software. Use this at your own risk!
 
+# about
+
+This is a bot that will refresh a product page on newegg or amazon at a
+configurable rate. The bot will check to see if the item is in stock and 
+that the price is below a configurable amount. If so, the item will be 
+purchased by going through whatever process is specific to the vendor.
+This requires being able to skip advertisements, surveys, insurance offers,
+etc. The bot will use all default options set on each site so it is
+important that the correct address and credit card is selected.
 
 # run
 
