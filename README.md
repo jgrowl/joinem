@@ -1,3 +1,9 @@
+# Joinem
+
+A configurable bot that automatically buys items from newegg and amazon
+
+If you can't beat the em... Joinem
+
 :warning: This project is NOT in a safe state to run if you do not 
 know what you are doing :warning: 
 
@@ -66,29 +72,29 @@ This list will probably grow:
 
 ## general
 
-- :ballot_box_with_check: fix chrome data directory failures
+- [ ] fix chrome data directory failures
 
 ## amazon
 
-- :white_check_mark: purchases highly-available items 
-- :ballot_box_with_check: purchases low-availability items (ie. 3080)
-- :ballot_box_with_check: knows to refresh and submit form on amazon until out of stock 
-- :ballot_box_with_check: reworked logic to be stateless 
+- [x] purchases highly-available items 
+- [ ] purchases low-availability items (ie. 3080)
+- [ ] knows to refresh and submit form on amazon until out of stock 
+- [ ] reworked logic to be stateless 
 
 ## newegg
 
-- :white_check_mark: purchases highly-available items 
-- :ballot_box_with_check: purchases low-availability items (ie. 3080)
-- :ballot_box_with_check: knows when to stop after successful purchase 
+- [x] purchases highly-available items 
+- [ ] purchases low-availability items (ie. 3080)
+- [ ] knows when to stop after successful purchase 
 
 # future
 
 ## general
 
-- :ballot_box_with_check: adds browser-based ui 
-- :ballot_box_with_check: adds remote control 
-- :ballot_box_with_check: adds un-logged-in remote communication 
-- :ballot_box_with_check: provides better logging
+- [ ] adds browser-based ui 
+- [ ] adds remote control 
+- [ ] adds un-logged-in remote communication 
+- [ ] provides better logging
 
 # dev run
 
