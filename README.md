@@ -1,9 +1,9 @@
 # disclaimer
 
 I am not responsible for how you use this. You probably shouldn't.
-I cannot gaurantee that you will not get banned from any services or
-over purchase items that you cannot afford. I cannot gaurantee your 
-personal information will not be comprimised by a bug or an adulterated 
+I cannot guarantee that you will not get banned from any services or
+over purchase items that you cannot afford. I cannot guarantee your 
+personal information will not be compromised by a bug or an adulterated 
 version of this software. Use this at your own risk!
 
 # about
