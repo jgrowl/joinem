@@ -60,8 +60,8 @@ This list will probably grow:
 ## newegg
 
 - :white_check_mark: purchases highly-available items 
-- :ballot_box_with_check: j:x: purchases low-availability items (ie. 3080)
-- :ballot_box_with_check: :x: knows when to stop after successful purchase 
+- :ballot_box_with_check: purchases low-availability items (ie. 3080)
+- :ballot_box_with_check: knows when to stop after successful purchase 
 
 # future
 
