@@ -1,6 +1,10 @@
 :warning: This project is not in a safe state to run if you do not 
 know what you are doing :warning: 
 
+:no_entry: No Scalpers! :no_entry:
+
+Scalpers are not welcome to use this software. This is to level the field.
+
 # disclaimer
 
 I am not responsible for how you use this. You probably shouldn't.
@@ -11,7 +15,7 @@ version of this software. Use this at your own risk!
 
 # about
 
-This is a bot that will refresh a product page on newegg or amazon at a
+This is a bot :robot: that will refresh a product page on newegg or amazon at a
 configurable rate. The bot will check to see if the item is in stock and 
 that the price is below a configurable amount. If so, the item will be 
 purchased by going through whatever process is specific to the vendor.
