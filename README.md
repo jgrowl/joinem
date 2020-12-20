@@ -2,7 +2,7 @@
 
 A configurable bot that automatically buys items from newegg and amazon
 
-If you can't beat the em... Joinem
+> If you can't beat the em... Joinem
 
 :warning: This project is NOT in a safe state to run if you do not 
 know what you are doing :warning: 
