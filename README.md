@@ -1,4 +1,4 @@
-:warning: This project is not in a safe state to run if you do not 
+:warning: This project is NOT in a safe state to run if you do not 
 know what you are doing :warning: 
 
 :no_entry: No Scalpers! :no_entry:
@@ -52,15 +52,15 @@ This list will probably grow:
 
 ## amazon
 
-- :white_check_mark: purchases uncontested items 
-- :x: purchases contested amazon items 
+- :white_check_mark: purchases highly-available items 
+- :x: purchases low-availability items (ie. 3080)
 - :x: knows to refresh and submit form on amazon until out of stock 
 - :x: reworked logic to be stateless 
 
 ## newegg
 
-- :white_check_mark: purchases uncontested items 
-- :x: purchases contested items 
+- :white_check_mark: purchases highly-available items 
+- :x: purchases low-availability items (ie. 3080)
 - :x: knows when to stop after successful purchase 
 
 # future
