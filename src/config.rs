@@ -59,12 +59,11 @@ pub struct JoinemConfig {
   pub secure_checkout_selector: Option<String>,
   pub ec_frame_selector: Option<String>,
 
-
   pub linux_chrome_bin_default: String,
   pub macos_chrome_bin_default: String,
   pub windows_chrome_bin_default: String, 
   pub other_chrome_bin_default: String, 
-
+  pub windows_canary_bin_default: String,
 }
 
 impl JoinemConfig {
@@ -98,7 +97,7 @@ impl JoinemConfig {
     if self.chrome_bin.is_some() {
       return self.chrome_bin.clone().unwrap().to_owned()
     }
-
+// windows_canary_bin_default
     match self.chrome_bin.clone() {
       Some(path) => path,
       None => {
@@ -108,9 +107,16 @@ impl JoinemConfig {
         } else if std::path::Path::new(&self.macos_chrome_bin_default).exists() {
           // macOS
           self.macos_chrome_bin_default.to_owned()
+        } else if std::path::Path::new(&self.windows_canary_bin_default).exists() {
+            // TODO: For now since it is the only way windows works,
+            // check for and use canary if it is there.
+            // When windows gets the latest chrome version that supports
+            // webdriver then this can be changed.
+            self.windows_canary_bin_default.to_owned()
         } else if std::path::Path::new(&self.windows_chrome_bin_default).exists() {
             self.windows_chrome_bin_default.to_owned()
-        } else {
+        } 
+        else {
           // elsewhere, it's just called chromium
           self.other_chrome_bin_default.to_owned()
         }

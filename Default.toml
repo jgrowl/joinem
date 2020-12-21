@@ -28,5 +28,12 @@ args = [
 
 linux_chrome_bin_default = "/usr/bin/chromium-browser"
 macos_chrome_bin_default = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-windows_chrome_bin_default = "C:/Program Files/Google/Application/chrome.exe"
+
+
+windows_chrome_bin_default = "%ProgramFiles%\\Google\\Application\\chrome.exe"
+# Latest windows version of chrome doesn't support webdriver yet.
+# We have to use canary instead for now
+windows_canary_bin_default = "%LOCALAPPDATA%\\Google\\Chrome\\ SxS\\Application\\chrome.exe"
+
 other_chrome_bin_default = "/usr/bin/chromium"
+
