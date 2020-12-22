@@ -39,20 +39,6 @@ important that the correct address and credit card is selected.
 
 [set items and other configuration](#config)
 
-# setup chrome data directories 
-
-This is a work around for an annoying bug that I have to fix and it will
-go away in the future. A copy (per bot) of your chrome data directory 
-needs to be added to your JOINEM_DATA folder. This is set to a folder 
-named `joinem_data` in the executable directory. 
-
-Basically copy `~/Library/Caches/Google/Chrome` to `joinem_data` 10 times 
-if you want the bot monitoring 10 different items.
-
-You must login to the site you are botting before copying these directories.
-These folders have your site cookies/cache and are what allow the bots
-to be logged in without having to sign in every time for each one.
-
 # run
 
 get and run [chromedriver](#chromedriver)
@@ -147,3 +133,19 @@ set your amazon items using `[items]`
 [//]: # (cargo install systemfd cargo-watch)
 [//]: # (FUTURE: dev run when using cargo-watch)
 [//]: # (systemfd --no-pid -s http::3030 -- cargo watch -x 'run')
+
+
+# Troubleshooting 
+
+# Chrome user data directories 
+
+Each chrome client has to use its own directory and they will error
+if they try to share. Logging in with every window, every time would 
+be too much. Instead A window to log in will pop up and then close
+after logging in. This client's directory will become the template
+for the rest of the bots. This is so they can share sessions and 
+all stay logged in. These directories can become stale so just
+delete them all in the `joinem_data` to regenerate. This also
+has the benefit that we can keep the users actual chrome data 
+away from all of this and that it will be much faster to copy 
+newly generated chrome user data directories.
