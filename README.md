@@ -64,11 +64,11 @@ This list will probably grow:
 
 ## general
 
-- [ ] fix chrome data directory failures
+- [x] fix chrome data directory failures
 
 ## amazon
 
-- [x] purchases highly-available items 
+- [ ] purchases highly-available items 
 - [ ] purchases low-availability items (ie. 3080)
 - [ ] knows to refresh and submit form on amazon until out of stock 
 - [ ] reworked logic to be stateless 
