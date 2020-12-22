@@ -1,12 +1,9 @@
 username = "amazon_username"
 password = "amazon_password"
-#chrome_user_data = "~/Library/Caches/Google/Chrome"
-data = "/tmp/joinem"
 newegg_username = "newegg_username"
 newegg_password = "newegg_password"
 cvv = "000"
 card_number = "55555555555555"
-
 
 #[[items]]
 #name = "AMD Ryzen 5950X"
