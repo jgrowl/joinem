@@ -1,5 +1,7 @@
-mod utag_data;
+pub mod utag_data;
+pub mod elements;
 
+use crate::newegg::elements::NeweggElements;
 use std::convert::TryInto;
 use std::time::{Duration};
 use std::str::FromStr;
@@ -13,27 +15,29 @@ use crate::config::Item;
 use crate::types::ElementResult;
 use crate::JOINEM_CONFIG;
 
+use utag_data::Utag_Data;
 
-// pub struct Bot<'a> {
 pub struct Bot {
-  // pub client: &'a mut Client,
   pub client: Client,
-  pub item: Item
+  pub item: Option<Item>
 }
 
-
-// impl <'a> Bot<'a> {
 impl Bot {
 
-  pub async fn new(client: Client, item: Item) -> Bot {
+  pub async fn new(client: Client, item: Option<Item>) -> Bot {
     let mut bot = Bot{client, item};
-    bot.goto().await;
+    // bot.goto().await;
 
     bot
   }
 
   pub async fn goto(&mut self) {
-      self.client.goto(&self.item.url.clone()).await;
+      self.client.goto(&self.item().url.clone()).await;
+  }
+
+  pub async fn goto_login(&mut self) {
+    let url = JOINEM_CONFIG.newegg_sign_in_url.clone();
+      self.client.goto(&url).await;
   }
 
   pub async fn close(&mut self) {
@@ -52,17 +56,17 @@ impl Bot {
 
     let mut card_number_input = element.unwrap();
 
-    debug!("CARDFOUND\t{}", self.item.name);
+    debug!("CARDFOUND\t{}", self.item().name);
     let card_number = JOINEM_CONFIG.card_number.to_owned().unwrap();
     card_number_input.clone().click().await;
     // card_number_input.clear().await;
 
     match card_number_input.send_keys(&card_number).await {
       Ok(success) => { 
-        debug!("CARDFILL\t{}", self.item.name); 
+        debug!("CARDFILL\t{}", self.item().name); 
       },
       Err(err) => {
-        debug!("CARDFILLFAILED\t{}", self.item.name)
+        debug!("CARDFILLFAILED\t{}", self.item().name)
       }
     };
 
@@ -73,14 +77,14 @@ impl Bot {
     let cvv_selector = JOINEM_CONFIG.cvv_selector.to_owned().unwrap();
     match self.client.find(Locator::Css(&cvv_selector)).await {
       Ok(mut cvv_input) => {
-        debug!("CVV4FOUND\t{}", self.item.name);
+        debug!("CVV4FOUND\t{}", self.item().name);
         let cvv = JOINEM_CONFIG.cvv.to_owned().unwrap();
         cvv_input.clone().click().await;
         cvv_input.clear().await;
         match cvv_input.send_keys(&cvv).await {
-          Ok(success) => { debug!("CVV4FILL\t{}", self.item.name); },
+          Ok(success) => { debug!("CVV4FILL\t{}", self.item().name); },
           Err(err) => {
-            debug!("CVV4FILLFAILED\t{}", self.item.name)
+            debug!("CVV4FILLFAILED\t{}", self.item().name)
           }
         };
         Some(cvv_input)
@@ -95,12 +99,12 @@ impl Bot {
     if element.is_err() { return None; };
     let mut username_input = element.unwrap();
 
-    debug!("EMAILFOUND\t{}", self.item.name);
+    debug!("NEWEGGEMAILFOUND");
     let username = JOINEM_CONFIG.newegg_username.to_owned();
     match username_input.send_keys(&username).await {
-          Ok(success) => { debug!("EMAILFILL\t{}", self.item.name); },
+          Ok(success) => { debug!("NEWEGGEMAILFILL") },
           Err(err) => {
-            debug!("EMAILFILLFAILED\t{}", self.item.name)
+            debug!("EMAILFILLFAILED")
           }
     }
 
@@ -113,13 +117,13 @@ impl Bot {
     if element.is_err() { return None; };
     let mut element = element.unwrap();
 
-    debug!("PASSFOUND\t{}", self.item.name);
+    debug!("PASSFOUND");
     let value = JOINEM_CONFIG.newegg_password.to_owned();
 
     match element.send_keys(&value).await {
-          Ok(success) => { debug!("PASSFILLSUCCESS\t{}", self.item.name); },
+          Ok(success) => { debug!("PASSFILLSUCCESS"); },
           Err(err) => {
-            debug!("PASSFILLFAILED\t{}", self.item.name)
+            debug!("PASSFILLFAILED")
           }
     }
 
@@ -136,7 +140,7 @@ impl Bot {
     if element.is_err() { return None; };
     let mut element = element.unwrap();
 
-    debug!("SIGNINSUBMITFOUND\t{}", self.item.name);
+    debug!("SIGNINSUBMITFOUND");
 
     Some(element)
   }
@@ -148,7 +152,7 @@ impl Bot {
     if element.is_err() { return None; };
     let mut element = element.unwrap();
 
-    debug!("ECFRAMEFOUND\t{}", self.item.name);
+    debug!("ECFRAMEFOUND\t{}", self.item().name);
 
     Some(element)
   }
@@ -160,7 +164,7 @@ impl Bot {
     if element.is_err() { return None; };
     let mut element = element.unwrap();
 
-    debug!("SURVEYFOUND\t{}", self.item.name);
+    debug!("SURVEYFOUND\t{}", self.item().name);
 
     Some(element)
   }
@@ -172,7 +176,7 @@ impl Bot {
     if element.is_err() { return None; };
     let mut element = element.unwrap();
 
-    debug!("ADDTOCART\t{}", self.item.name);
+    debug!("ADDTOCART\t{}", self.item().name);
 
     Some(element)
       // TODO: Check that text actually is add to cart
@@ -190,7 +194,7 @@ impl Bot {
     if text.is_ok() {
       let text = text.unwrap().to_uppercase().replace(" ", "");
       if text.eq("NO,THANKS") {
-        debug!("INSURANCEFOUND\t{}", self.item.name);
+        debug!("INSURANCEFOUND\t{}", self.item().name);
         r = Some(element);
       } 
     } 
@@ -217,13 +221,37 @@ impl Bot {
     if text.is_ok() {
       let text = text.unwrap().to_uppercase().replace(" ", "");
       if text.eq("I'MNOTINTERESTED.") {
-        debug!("PROMOTIONFOUND\t{}", self.item.name);
+        debug!("PROMOTIONFOUND\t{}", self.item().name);
         r = Some(element);
       } 
     } 
 
     r
   }
+
+
+
+  pub async fn get_sign_in_el(&mut self) -> Option<Element> {
+    let selector = JOINEM_CONFIG.sign_in_selector.to_owned().unwrap();
+    let mut element = self.client.find(Locator::Css(&selector)).await;
+    if element.is_err() { return None; };
+    let mut element = element.unwrap();
+
+    let text = element.text().await;
+    let mut r = None;
+    if text.is_ok() {
+      let text = text.unwrap().to_uppercase().replace(" ", "");
+      if text.eq("SIGNIN/REGISTER") {
+        debug!("SAVEFOUND\t{}", self.item().name);
+        r = Some(element);
+      } 
+    } 
+
+    r
+  }
+
+
+
 
   pub async fn get_save_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.save_selector.to_owned().unwrap();
@@ -236,7 +264,7 @@ impl Bot {
     if text.is_ok() {
       let text = text.unwrap().to_uppercase().replace(" ", "");
       if text.eq("SAVE") {
-        debug!("SAVEFOUND\t{}", self.item.name);
+        debug!("SAVEFOUND\t{}", self.item().name);
         r = Some(element);
       } 
     } 
@@ -244,6 +272,9 @@ impl Bot {
     r
   }
 
+  pub fn item(&self) -> Item {
+    self.item.clone().unwrap()
+  }
 
   pub async fn get_view_cart_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.view_cart_selector.to_owned().unwrap();
@@ -324,21 +355,6 @@ impl Bot {
       self.client.clone().enter_parent_frame().await;
     }
 
-
-
-    // ADDTOCART, VIEWCART: https://www.newegg.com/p/0GA-0105-00040?Item=9SIACD5CS57992&quicklink=true
-    //
-    // CONTINUETOPAYMENT: https://secure.newegg.com/shop/checkout?sessionId=XOWN2QAEUGLBRJS33211F
-    //
-    // SECURECHECKOUT: https://secure.newegg.com/shop/cart
-    // https://secure.newegg.com/shop/checkout
-
-
-    // https://secure.newegg.com/shop/cart
-    // SECURECHECKOUT 
-    // https://secure.newegg.com/shop/checkout?sessionId=ETQBLO8QYUO7OSS702CC
-    // "CONTINUETOPAYMENT"
-
     let mut clickable = if survey_el.is_some() {
       // debug!("SKIPSURVEY\t{}", item.name);
       // The survey is annoying because even if you dismiss it, it will 
@@ -410,7 +426,7 @@ impl Bot {
       debug!("SECURECHECKOUT\t{}", item.name);
       secure_checkout_el.unwrap()
     } else {
-      warn!("NOCLICKABLES\t{}", item.name);
+      debug!("SLEEP\t{}", item.name);
       return Ok(None);
     };
 
@@ -419,7 +435,26 @@ impl Bot {
       // TODO: CHECK SAVE
       // Review your order
   }
+
+
+  pub async fn auto2(&mut self, elements: &NeweggElements) -> ElementResult {
+
+    let mut clickable = if elements.sign_in_submit_el.is_some() {
+      debug!("NEWEGGSIGNIN");
+      elements.sign_in_submit_el.clone().unwrap()
+		} else if elements.sign_in_el.is_some() {
+			elements.sign_in_el.clone().unwrap()
+		}
+    else {
+      warn!("SLEEP");
+      return Ok(None);
+    };
+
+    Ok(Some(clickable))
+  }
 }
+
+      // self.client.clone().enter_parent_frame().await;
 
 
 // use url::{Url, ParseError};

@@ -1,4 +1,9 @@
-chrome_user_data_mac_default = "~/Library/Caches/Google/Chrome"
+#newegg_chrome_user_data_template = "TEMPLATE_NEWEGG_CHROME_USER_DATA"
+#amazon_chrome_user_data_template = "TEMPLATE_AMAZON_CHROME_USER_DATA"
+
+
+newegg_sign_in_url = "https://secure.newegg.com/NewMyAccount/AccountLogin.aspx?nextpage=https%3A%2F%2Fsecure.newegg.com%2Fshop%2Fcart"
+
 data = "joinem_data"
 webdriver_url = "http://localhost:9515"
 refresh_seconds = 15
@@ -17,6 +22,8 @@ secure_checkout_selector = "form div.summary-actions button.btn-primary"
 ec_frame_selector = "iframe[title='ec_payment']"
 card_number_selector = "input[type='text'].mask-cardnumber"
 save_selector = "button.btn-primary"
+sign_in_selector = "div.nav-complex div.nav-complex-title"
+
 
 args = [
   "--disable-gpu", 
@@ -28,11 +35,41 @@ args = [
 linux_chrome_bin_default = "/usr/bin/chromium-browser"
 macos_chrome_bin_default = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-
 windows_chrome_bin_default = "%ProgramFiles%\\Google\\Application\\chrome.exe"
 # Latest windows version of chrome doesn't support webdriver yet.
 # We have to use canary instead for now
 windows_canary_bin_default = "%LOCALAPPDATA%\\Google\\Chrome\\ SxS\\Application\\chrome.exe"
 
 other_chrome_bin_default = "/usr/bin/chromium"
+
+
+# https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md
+# These user data directories are checked.
+#
+#   windows
+# [x] [Chrome] %LOCALAPPDATA%\Google\Chrome\User Data
+#     [Chrome Canary] %LOCALAPPDATA%\Google\Chrome SxS\User Data
+#     [Chromium] %LOCALAPPDATA%\Chromium\User Data
+#
+#   macOS
+# [x] [Chrome] ~/Library/Application Support/Google/Chrome
+#     [Chrome Canary] ~/Library/Application Support/Google/Chrome Canary
+#     [Chromium] ~/Library/Application Support/Chromium
+#
+#   linux
+# [x] [Chrome Stable] ~/.config/google-chrome
+#     [Chrome Beta] ~/.config/google-chrome-beta
+#     [Chrome Dev] ~/.config/google-chrome-unstable
+# [x] [Chromium] ~/.config/chromium
+#
+linux_chrome_user_data_default = "~/.config/google-chrome"
+macos_chrome_user_data_default = "~/Library/Application Support/Google/Chrome"
+
+windows_chrome_user_data_default = "%LOCALAPPDATA%\\Google\\Chrome\\User Data"
+# Latest windows version of chrome doesn't support webdriver yet.
+# We have to use canary instead for now
+windows_canary_user_data_default = "%LOCALAPPDATA%\\Google\\Chrome SxS\\User Data"
+
+other_chrome_user_data_default = "~/.config/chromium"
+
 

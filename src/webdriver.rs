@@ -1,10 +1,12 @@
+use log::{info, warn, debug};
 use std::{io, fs};
 use fantoccini::{Client, Locator};
 
+use shellexpand::tilde;
+
 use crate::{JOINEM_CONFIG};
 
-pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
-  let out_dir = JOINEM_CONFIG.find_or_create_data_folder();
+pub async fn new_client(out_dir: String) -> Result<Client, fantoccini::error::CmdError> {
   // let mut caps = JOINEM_CONFIG.caps(&out_dir);
   let mut caps = caps(&out_dir);
   let webdriver_url = JOINEM_CONFIG.webdriver_url.clone().unwrap();
@@ -12,8 +14,10 @@ pub async fn new_client() -> Result<Client, fantoccini::error::CmdError> {
 }
 
 pub fn caps(out_dir: &str) -> serde_json::Map<std::string::String, serde_json::Value> {
-
   let mut caps = serde_json::map::Map::new();
+
+  // let out_dir = tilde(&out_dir).to_string();
+
   let out_dir_arg = format!("--user-data-dir={}", out_dir);
   let mut v = vec![out_dir_arg];
 

@@ -27,6 +27,10 @@ pub fn udata_array(utag_data: &serde_json::Value, name: &str) -> Option<String> 
 pub fn udata_array_f32(utag_data: &serde_json::Value, name: &str) -> Option<f32> {
   match utag_data[name].as_array() {
     Some(array) => {
+      if array.len() <= 0 {
+        return None;
+      }
+
       let element = array[0].as_str().unwrap_or("");
       let element = if element.eq("") {
         None
@@ -65,7 +69,14 @@ pub struct Utag_Data {
 }
 
 pub async fn newegg_utag_data(mut client: & mut Client) -> Result<Utag_Data, fantoccini::error::CmdError> {
-	let utag_data = client.execute("return utag_data", vec![]).await.unwrap();
+
+	// let utag_data = client.execute("return utag_data", vec![]).await.unwrap();
+	let utag_data = client.execute("return utag_data", vec![]).await;
+  let utag_data = match utag_data {
+    Err(e) => { return Err(e) },
+    Ok(utag_data) => { utag_data }
+  };
+
 
 	let user_name: Option<String> =  udata_string(&utag_data, "user_name");
 	let page_name: Option<String> = udata_string(&utag_data, "page_name");

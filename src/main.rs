@@ -20,7 +20,7 @@ use std::process;
 use std::time::{Duration};
 use std::path::Path;
 
-use log::{info, warn, debug};
+use log::{info, warn, debug, error};
 use log4rs;
 
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -31,6 +31,7 @@ use crate::amazon::check_amazon_item;
 use crate::newegg::{Bot as NeweggBot};
 
 use crate::webdriver::new_client;
+use crate::newegg::elements::NeweggElements;
 
 // use num_bigint::{ToBigInt, RandBigInt};
 // use num::traits::ToPrimitive;
@@ -84,30 +85,75 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   }).expect("Error setting Ctrl-C handler");
 
   println!("Waiting for Ctrl-C...");
+
+	let spawn = tokio::spawn(async move {
   // Amazon
 	// let mut bots = run_amazon().await;
 
-  // Newegg
-  let mut bots = run_newegg().await;
+	// Newegg
+		newegg_login().await;
+		let mut bots = run_newegg().await;
+		// cleanup(bots).await;
+	});
 
   while running.load(Ordering::SeqCst) { }
   println!("\nShutting down joinem!");
 
-  cleanup(bots).await;
-
   Ok(())
+}
+
+async fn newegg_login() {
+  {
+    let out_dir = JOINEM_CONFIG.newegg_chrome_user_data_template();
+
+    let mut client = new_client(out_dir).await.expect("Failed to create new client!");
+    let mut bot = NeweggBot::new(client, None).await;
+
+    bot.goto_login().await;
+
+    loop {
+      let elements = NeweggElements::new(&mut bot).await;
+      let mut clickable = bot.auto2(&elements).await;
+      if clickable.is_err() {
+        warn!("NEWEGGCLIENTERROR");
+      }
+
+      let clickable = clickable.unwrap();
+      if clickable.is_some() {
+        // debug!("NEWEGGCLICK\t{}", item.name);
+        clickable.unwrap().click().await;
+        delay_for(Duration::from_secs(3)).await;
+        continue;
+      } 
+
+      if let Some(utag_data) = elements.utag_data {
+        if let Some(user_name) = utag_data.user_name {
+          info!("NEWEGGLOGGEDIN");
+          delay_for(Duration::from_secs(2)).await;
+          break;
+        }
+      }
+
+      let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
+      delay_for(Duration::from_secs(refresh_seconds)).await;
+      bot.refresh().await;
+    }
+
+    bot.close().await;
+  }
 }
 
 async fn run_newegg() -> Vec<Bot2> {
   let items = JOINEM_CONFIG.newegg_items.clone();
-
   let mut spawns = vec![]; 
   for item in items.into_iter() {
     let the_item = item.clone();
     debug!("Starting {:?}", item.name);
     let spawn = tokio::spawn(async move {
-      let mut client = new_client().await.expect("Failed to create new client!");
-      let mut bot = NeweggBot::new(client, item.clone()).await;
+      let out_dir = JOINEM_CONFIG.find_or_create_data_folder();
+      let mut client = new_client(out_dir).await.expect("Failed to create new client!");
+      let mut bot = NeweggBot::new(client, Some(item.clone())).await;
+      bot.goto().await;
 
       loop {
         let mut clickable = bot.auto(item.clone()).await;
@@ -169,7 +215,8 @@ async fn run_amazon() -> Vec<Bot2> {
     debug!("Starting {:?}", item.name);
     let spawn = tokio::spawn(async move {
 
-      let client = new_client().await.expect("Failed to create new client!");
+      let out_dir = JOINEM_CONFIG.find_or_create_data_folder();
+      let client = new_client(out_dir).await.expect("Failed to create new client!");
 
       check_amazon_item(client, item.clone()).await;
     });
