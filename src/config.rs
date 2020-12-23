@@ -67,7 +67,7 @@ pub struct JoinemConfig {
   pub ec_frame_selector: Option<String>,
 
   pub sign_in_selector: Option<String>,
-
+  pub success_selector: Option<String>,
 
   pub linux_chrome_bin_default: String,
   pub macos_chrome_bin_default: String,

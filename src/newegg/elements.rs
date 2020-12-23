@@ -21,6 +21,7 @@ pub struct NeweggElements {
   pub  secure_checkout_el: Option<Element>,
   pub card_number_el: Option<Element>,
   pub  save_el: Option<Element>,
+  pub  success_el: Option<Element>,
   pub  ec_frame_el: Option<Element>, 
 }
 
@@ -48,6 +49,8 @@ impl NeweggElements {
 
 // div.nav-complex div.nav-complex-title.  <div class="nav-complex-title">Sign in / Register</div>
 		let sign_in_el = bot.get_sign_in_el().await;
+
+		let success_el = bot.get_success_el().await;
 
 
     let mut card_number_el = None;
@@ -81,6 +84,7 @@ impl NeweggElements {
       save_el,
       ec_frame_el,
 			sign_in_el,
+			success_el,
     }
   }
 }

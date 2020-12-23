@@ -12,10 +12,11 @@ use async_std::future;
 use fantoccini::{Client, Locator, Element};
 
 use crate::config::Item;
-use crate::types::ElementResult;
+use crate::types::{ElementResult, Action::{Click, Wait, End}};
 use crate::JOINEM_CONFIG;
 
 use utag_data::Utag_Data;
+use crate::types::Action;
 
 pub struct Bot {
   pub client: Client,
@@ -182,7 +183,6 @@ impl Bot {
       // TODO: Check that text actually is add to cart
   }
 
-
   pub async fn get_insurance_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.insurance_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
@@ -201,6 +201,39 @@ impl Bot {
 
     r
   }
+
+  pub async fn get_success_el(&mut self) -> Option<Element> {
+    let selector = JOINEM_CONFIG.success_selector.to_owned().unwrap();
+		self.get_el(selector).await
+  }
+
+  pub async fn get_el(&mut self, selector: String) -> Option<Element> {
+    let mut element = self.client.find(Locator::Css(&selector)).await;
+		match element {
+			Ok(element) => Some(element),
+			Err(e) => None
+		}
+  }
+
+  pub async fn get_el_with_text(&mut self, selector: String, content: String) -> Option<Element> {
+    let mut element = self.client.find(Locator::Css(&selector)).await;
+    if element.is_err() { return None; };
+    let mut element = element.unwrap();
+
+    let text = element.text().await;
+    let mut r = None;
+    if text.is_ok() {
+      let text = text.unwrap().to_uppercase().replace(" ", "");
+      if text.eq(&content) {
+        r = Some(element);
+      } 
+    } 
+
+    r
+  }
+
+
+
 
   pub async fn get_continue_to_payment_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.continue_to_payment_selector.to_owned().unwrap();
@@ -437,20 +470,22 @@ impl Bot {
   }
 
 
-  pub async fn auto2(&mut self, elements: &NeweggElements) -> ElementResult {
-
-    let mut clickable = if elements.sign_in_submit_el.is_some() {
-      debug!("NEWEGGSIGNIN");
-      elements.sign_in_submit_el.clone().unwrap()
-		} else if elements.sign_in_el.is_some() {
-			elements.sign_in_el.clone().unwrap()
+  pub async fn auto2(&mut self, elements: &NeweggElements) -> Action {
+		if let Some(utag_data) = &elements.utag_data {
+			if let Some(user_name) = &utag_data.user_name {
+				return End;
+			}
 		}
-    else {
-      warn!("SLEEP");
-      return Ok(None);
-    };
 
-    Ok(Some(clickable))
+     if elements.sign_in_submit_el.is_some() {
+      debug!("NEWEGGSIGNIN");
+      Click(elements.sign_in_submit_el.clone().unwrap())
+		} else if elements.sign_in_el.is_some() {
+			Click(elements.sign_in_el.clone().unwrap())
+		} else {
+      debug!("SLEEP");
+      Wait
+    }
   }
 }
 

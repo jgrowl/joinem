@@ -42,6 +42,8 @@ use std::str::FromStr;
 use rand::prelude::*;
 use std::{io, fs};
 
+use crate::types::Action::{Wait, Click, End};
+use crate::types::Action;
 
 extern crate ctrlc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -113,30 +115,24 @@ async fn newegg_login() {
 
     loop {
       let elements = NeweggElements::new(&mut bot).await;
-      let mut clickable = bot.auto2(&elements).await;
-      if clickable.is_err() {
-        warn!("NEWEGGCLIENTERROR");
-      }
 
-      let clickable = clickable.unwrap();
-      if clickable.is_some() {
-        // debug!("NEWEGGCLICK\t{}", item.name);
-        clickable.unwrap().click().await;
-        delay_for(Duration::from_secs(3)).await;
-        continue;
-      } 
-
-      if let Some(utag_data) = elements.utag_data {
-        if let Some(user_name) = utag_data.user_name {
-          info!("NEWEGGLOGGEDIN");
-          delay_for(Duration::from_secs(2)).await;
-          break;
-        }
-      }
-
-      let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
-      delay_for(Duration::from_secs(refresh_seconds)).await;
-      bot.refresh().await;
+			match bot.auto2(&elements).await {
+				Click(clickable) => {
+					clickable.click().await;
+					delay_for(Duration::from_secs(3)).await;
+					continue;
+				},
+				Wait => {
+					let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
+					delay_for(Duration::from_secs(refresh_seconds)).await;
+					bot.refresh().await;
+				},
+				End => {
+					info!("NEWEGGLOGGEDIN");
+					delay_for(Duration::from_secs(2)).await;
+					break;
+				}
+			}
     }
 
     bot.close().await;

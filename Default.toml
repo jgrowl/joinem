@@ -24,6 +24,7 @@ card_number_selector = "input[type='text'].mask-cardnumber"
 save_selector = "button.btn-primary"
 sign_in_selector = "div.nav-complex div.nav-complex-title"
 
+success_selector = "a[title='View order detail in a new window.']"
 
 args = [
   "--disable-gpu", 
