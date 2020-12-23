@@ -330,50 +330,14 @@ impl Bot {
 
 
 	pub async fn auto(&mut self, elements: &NeweggElements, item: Item) -> Action {
-  // pub async fn auto(&mut self, item: Item) -> ElementResult {
     let current_url = self.client.current_url().await.unwrap();
     let path = current_url.path();
-
-		// if let Some(utag_data) = &elements.utag_data {
-		//   if let Some(user_name) = &utag_data.user_name {
-		//     return End;
-		//   }
-		// }
-
 
     // Check if this is neccessary. Put it here because element wasns't
     // showing up unless scrolled down, but it might have been a problem
     // with find vs findall where I was only getting the first element
     self.scroll_to_bottom().await;
     // self.resize().await;
-
-    // let utag_data = self::utag_data::newegg_utag_data(&mut self.client).await?;
-    //
-    // let cvv_el = self.get_cvv_el_and_try_fill().await;
-    // let username_el = self.get_username_el_and_try_fill().await;
-    // let password_el = self.get_password_el_and_try_fill().await;
-    //
-    // let sign_in_submit_el = self.get_sign_in_submit_el().await;
-    // let survey_el = self.get_survey_el().await;
-    // let insurance_el = self.get_insurance_el().await;
-    // let promotion_el = self.get_promotion_el().await;
-    // let continue_to_payment_el = self.get_continue_to_payment_el().await;
-    // let view_cart_el = self.get_view_cart_el().await;
-    // let add_to_cart_el = self.get_add_to_cart_el().await;
-    // let secure_checkout_el = self.get_secure_checkout_el().await;
-    //
-    // let mut card_number_el = None;
-    // let mut save_el = None;
-    // let mut ec_frame_el = self.get_ec_frame_el().await;
-    // if ec_frame_el.is_some() {
-    //   let frame = ec_frame_el.unwrap();
-    //
-    //   frame.enter_frame().await;
-    //   save_el = self.get_save_el().await;
-    //
-    //   card_number_el = self.get_card_number_el_and_try_fill().await;
-    //   self.client.clone().enter_parent_frame().await;
-    // }
 
     if elements.survey_el.is_some() {
       // debug!("SKIPSURVEY\t{}", item.name);
@@ -384,11 +348,7 @@ impl Bot {
       let survey = elements.survey_el.as_ref().unwrap().clone();
       survey.click().await;
       self.client.execute("document.querySelector('a.centerPopup-trigger-close').remove()", vec![]).await.unwrap();
-
-      // let placeholder = self.client.find(Locator::Css("p")).await.unwrap();
-      // return Ok(Some(placeholder));
 			return Stay 
-
     } else if elements.insurance_el.is_some() {
       debug!("SKIPINCOVERAGE\t{}", item.name);
       Click(elements.insurance_el.as_ref().unwrap().clone())
