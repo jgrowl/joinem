@@ -42,8 +42,8 @@ use std::str::FromStr;
 use rand::prelude::*;
 use std::{io, fs};
 
-use crate::types::Action::{Wait, Click, End};
-use crate::types::Action;
+// use crate::types::Action::{Stay, Wait, Click, End};
+use crate::types::Action::*;
 
 extern crate ctrlc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -113,14 +113,17 @@ async fn newegg_login() {
 
     bot.goto_login().await;
 
+    // 'outer: loop {
     loop {
       let elements = NeweggElements::new(&mut bot).await;
 
 			match bot.auto2(&elements).await {
-				Click(clickable) => {
-					clickable.click().await;
+				Stay => {
+					delay_for(Duration::from_secs(2)).await;
+				},
+				Click(element) => {
+					element.click().await;
 					delay_for(Duration::from_secs(3)).await;
-					continue;
 				},
 				Wait => {
 					let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
@@ -132,8 +135,8 @@ async fn newegg_login() {
 					delay_for(Duration::from_secs(2)).await;
 					break;
 				}
-			}
-    }
+			};
+    };
 
     bot.close().await;
   }
@@ -152,31 +155,58 @@ async fn run_newegg() -> Vec<Bot2> {
       bot.goto().await;
 
       loop {
-        let mut clickable = bot.auto(item.clone()).await;
-        if clickable.is_err() {
-            warn!("NEWEGGCLIENTERROR\t{}", item.name);
-        }
+				let elements = NeweggElements::new(&mut bot).await;
 
-        let clickable = clickable.unwrap();
-        if clickable.is_some() {
-          // debug!("NEWEGGCLICK\t{}", item.name);
-          clickable.unwrap().click().await;
-          delay_for(Duration::from_secs(3)).await;
-          continue;
-        } 
+				match bot.auto(&elements, item.clone()).await {
+					Stay => {
+						delay_for(Duration::from_secs(2)).await;
+					},
 
-        // TODO: Needs stop condition
-        // check url
-        if false {
-          info!("NEWEGGPURCHASED {}", item.name);
-          delay_for(Duration::from_secs(25)).await;
-          break;
-        }
+					Click(clickable) => {
+						clickable.click().await;
+						delay_for(Duration::from_secs(3)).await;
+						continue;
+					},
+					Wait => {
+						let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
+						delay_for(Duration::from_secs(refresh_seconds)).await;
+						bot.refresh().await;
+					},
+					End => {
+						info!("NEWEGGLOGGEDIN");
+						delay_for(Duration::from_secs(2)).await;
+						break;
+					}
+				}
+			}
 
-        let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
-        delay_for(Duration::from_secs(refresh_seconds)).await;
-        bot.refresh().await;
-      }
+
+
+        // let mut clickable = bot.auto(&elements, item.clone()).await;
+        // if clickable.is_err() {
+        //     warn!("NEWEGGCLIENTERROR\t{}", item.name);
+        // }
+
+        // let clickable = clickable.unwrap();
+        // if clickable.is_some() {
+        //   // debug!("NEWEGGCLICK\t{}", item.name);
+        //   clickable.unwrap().click().await;
+        //   delay_for(Duration::from_secs(3)).await;
+        //   continue;
+        // }
+
+        // // TODO: Needs stop condition
+        // // check url
+        // if false {
+        //   info!("NEWEGGPURCHASED {}", item.name);
+        //   delay_for(Duration::from_secs(25)).await;
+        //   break;
+        // }
+
+        // let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
+        // delay_for(Duration::from_secs(refresh_seconds)).await;
+        // bot.refresh().await;
+      // }
 
       bot.close().await;
 

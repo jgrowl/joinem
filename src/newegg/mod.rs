@@ -12,7 +12,7 @@ use async_std::future;
 use fantoccini::{Client, Locator, Element};
 
 use crate::config::Item;
-use crate::types::{ElementResult, Action::{Click, Wait, End}};
+use crate::types::{ElementResult, Action::{Click, Wait, End, Stay}};
 use crate::JOINEM_CONFIG;
 
 use utag_data::Utag_Data;
@@ -245,8 +245,6 @@ impl Bot {
     r
   }
 
-
-
   pub async fn get_sign_in_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.sign_in_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
@@ -330,9 +328,18 @@ impl Bot {
   //   self.client.set_window_size(width, height).await;
   // }
 
-  pub async fn auto(&mut self, item: Item) -> ElementResult {
-    let current_url = self.client.current_url().await?;
+
+	pub async fn auto(&mut self, elements: &NeweggElements, item: Item) -> Action {
+  // pub async fn auto(&mut self, item: Item) -> ElementResult {
+    let current_url = self.client.current_url().await.unwrap();
     let path = current_url.path();
+
+		// if let Some(utag_data) = &elements.utag_data {
+		//   if let Some(user_name) = &utag_data.user_name {
+		//     return End;
+		//   }
+		// }
+
 
     // Check if this is neccessary. Put it here because element wasns't
     // showing up unless scrolled down, but it might have been a problem
@@ -340,134 +347,119 @@ impl Bot {
     self.scroll_to_bottom().await;
     // self.resize().await;
 
-    let utag_data = self::utag_data::newegg_utag_data(&mut self.client).await?;
+    // let utag_data = self::utag_data::newegg_utag_data(&mut self.client).await?;
+    //
+    // let cvv_el = self.get_cvv_el_and_try_fill().await;
+    // let username_el = self.get_username_el_and_try_fill().await;
+    // let password_el = self.get_password_el_and_try_fill().await;
+    //
+    // let sign_in_submit_el = self.get_sign_in_submit_el().await;
+    // let survey_el = self.get_survey_el().await;
+    // let insurance_el = self.get_insurance_el().await;
+    // let promotion_el = self.get_promotion_el().await;
+    // let continue_to_payment_el = self.get_continue_to_payment_el().await;
+    // let view_cart_el = self.get_view_cart_el().await;
+    // let add_to_cart_el = self.get_add_to_cart_el().await;
+    // let secure_checkout_el = self.get_secure_checkout_el().await;
+    //
+    // let mut card_number_el = None;
+    // let mut save_el = None;
+    // let mut ec_frame_el = self.get_ec_frame_el().await;
+    // if ec_frame_el.is_some() {
+    //   let frame = ec_frame_el.unwrap();
+    //
+    //   frame.enter_frame().await;
+    //   save_el = self.get_save_el().await;
+    //
+    //   card_number_el = self.get_card_number_el_and_try_fill().await;
+    //   self.client.clone().enter_parent_frame().await;
+    // }
 
-    let cvv_el = self.get_cvv_el_and_try_fill().await;
-    let username_el = self.get_username_el_and_try_fill().await;
-    let password_el = self.get_password_el_and_try_fill().await;
-
-    let sign_in_submit_el = self.get_sign_in_submit_el().await;
-    let survey_el = self.get_survey_el().await;
-    let insurance_el = self.get_insurance_el().await;
-    let promotion_el = self.get_promotion_el().await;
-    let continue_to_payment_el = self.get_continue_to_payment_el().await;
-    let view_cart_el = self.get_view_cart_el().await;
-    let add_to_cart_el = self.get_add_to_cart_el().await;
-    let secure_checkout_el = self.get_secure_checkout_el().await;
-
-    let mut card_number_el = None;
-    let mut save_el = None;
-    let mut ec_frame_el = self.get_ec_frame_el().await;
-    if ec_frame_el.is_some() {
-      let frame = ec_frame_el.unwrap();
-
-      frame.enter_frame().await;
-      save_el = self.get_save_el().await;
-
-      card_number_el = self.get_card_number_el_and_try_fill().await;
-      self.client.clone().enter_parent_frame().await;
-    }
-
-    let mut clickable = if survey_el.is_some() {
+    if elements.survey_el.is_some() {
       // debug!("SKIPSURVEY\t{}", item.name);
       // The survey is annoying because even if you dismiss it, it will 
       // stick around in the background hidden. So just handle it here
       // and remove the node when finishe
 
-      let survey = survey_el.unwrap();
+      let survey = elements.survey_el.as_ref().unwrap().clone();
       survey.click().await;
       self.client.execute("document.querySelector('a.centerPopup-trigger-close').remove()", vec![]).await.unwrap();
 
-      let placeholder = self.client.find(Locator::Css("p")).await.unwrap();
-      return Ok(Some(placeholder));
+      // let placeholder = self.client.find(Locator::Css("p")).await.unwrap();
+      // return Ok(Some(placeholder));
+			return Stay 
 
-    } else if insurance_el.is_some() {
+    } else if elements.insurance_el.is_some() {
       debug!("SKIPINCOVERAGE\t{}", item.name);
-      insurance_el.unwrap()
-    } else if promotion_el.is_some() {
+      Click(elements.insurance_el.as_ref().unwrap().clone())
+    } else if elements.promotion_el.is_some() {
       debug!("SKIPPROMO\t{}", item.name);
-      promotion_el.unwrap()
-    }  else if sign_in_submit_el.is_some() {
+      Click(elements.promotion_el.as_ref().unwrap().clone())
+    }  else if elements.sign_in_submit_el.is_some() {
       debug!("SIGNIN\t{}", item.name);
-      sign_in_submit_el.unwrap()
-    } else if save_el.is_some(){
+      Click(elements.sign_in_submit_el.as_ref().unwrap().clone())
+    } else if elements.save_el.is_some(){
       debug!("SAVE\t{}", item.name);
-
       self.try_save().await;
-      debug!("YO BUY THIS THANG");
-
-      //Place Order button needs to be handled!
-
-      let placeholder = self.client.find(Locator::Css("p")).await.unwrap();
-      return Ok(Some(placeholder));
-
-    //   document.querySelectorAll('iframe').forEach( item =>
-    // console.log(item.contentWindow.document.body.querySelectorAll('a'))
-    //   )
-
-
-      // save_el.unwrap()
-
-    } else if continue_to_payment_el.is_some() {
+			return Stay;
+    } else if elements.continue_to_payment_el.is_some() {
       debug!("CONTINUETOPAYMENT\t{}", item.name);
-      continue_to_payment_el.unwrap()
-    } else if view_cart_el.is_some() {
+      Click(elements.continue_to_payment_el.as_ref().unwrap().clone())
+    } else if elements.view_cart_el.is_some() {
       debug!("VIEWCART\t{}", item.name);
-      view_cart_el.unwrap()
-    } else if add_to_cart_el.is_some() {
+      Click(elements.view_cart_el.as_ref().unwrap().clone())
+    } else if elements.add_to_cart_el.is_some() {
       debug!("FOUNDADDTOCART\t{}", item.name);
 
-      if utag_data.product_instock.is_none() 
-        || utag_data.product_sale_price.is_none() {
+      if elements.utag_data.is_none() 
+				|| elements.utag_data.as_ref().unwrap().product_instock.is_none() 
+        || elements.utag_data.as_ref().unwrap().product_sale_price.is_none() {
           debug!("NOUDATA\t{}", item.name);
-          return Ok(None);
+          return Wait;
       }
 
-      let instock = utag_data.product_instock.unwrap();
-      let sale_price = utag_data.product_sale_price.unwrap();
+      let instock = elements.utag_data.as_ref().unwrap().product_instock.as_ref().unwrap().clone();
+      let sale_price = elements.utag_data.as_ref().unwrap().product_sale_price.unwrap();
       if !instock {
         debug!("NOSTOCK\t{}", item.name);
-        return Ok(None);
+        return Wait;
       }
 
       if sale_price > item.max_price {
         debug!("EXPENSIVE\t{}", item.name);
-        return Ok(None);
+        return Wait;
       }
-      add_to_cart_el.unwrap()
-    } else if secure_checkout_el.is_some(){
+
+      Click(elements.add_to_cart_el.as_ref().unwrap().clone())
+    } else if elements.secure_checkout_el.is_some(){
       debug!("SECURECHECKOUT\t{}", item.name);
-      secure_checkout_el.unwrap()
+      Click(elements.secure_checkout_el.as_ref().unwrap().clone())
     } else {
       debug!("SLEEP\t{}", item.name);
-      return Ok(None);
-    };
-
-    Ok(Some(clickable))
-
+      return Wait;
+    }
       // TODO: CHECK SAVE
       // Review your order
   }
 
-
-  pub async fn auto2(&mut self, elements: &NeweggElements) -> Action {
+	pub async fn auto2(&mut self, elements: &NeweggElements) -> Action {
 		if let Some(utag_data) = &elements.utag_data {
 			if let Some(user_name) = &utag_data.user_name {
-				return End;
+				return End
 			}
 		}
-
-     if elements.sign_in_submit_el.is_some() {
-      debug!("NEWEGGSIGNIN");
-      Click(elements.sign_in_submit_el.clone().unwrap())
+		
+		if elements.sign_in_submit_el.is_some() {
+			debug!("NEWEGGSIGNIN");
+			Click(elements.sign_in_submit_el.clone().unwrap())
 		} else if elements.sign_in_el.is_some() {
 			Click(elements.sign_in_el.clone().unwrap())
 		} else {
-      debug!("SLEEP");
-      Wait
-    }
-  }
-}
+			debug!("SLEEP");
+			Wait
+		}
+	}
+	}
 
       // self.client.clone().enter_parent_frame().await;
 
