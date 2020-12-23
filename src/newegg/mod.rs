@@ -137,69 +137,55 @@ impl Bot {
 
   pub async fn get_sign_in_submit_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.sign_in_submit_selector.to_owned().unwrap();
-    let mut element = self.client.find(Locator::Css(&selector)).await;
-    if element.is_err() { return None; };
-    let mut element = element.unwrap();
+		let element = self.get_el(selector).await;
+		if element.is_some() {
+			debug!("SIGNINSUBMITFOUND");
+		}
 
-    debug!("SIGNINSUBMITFOUND");
-
-    Some(element)
+    element
   }
 
 
   pub async fn get_ec_frame_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.ec_frame_selector.to_owned().unwrap();
-    let mut element = self.client.find(Locator::Css(&selector)).await;
-    if element.is_err() { return None; };
-    let mut element = element.unwrap();
+		let element = self.get_el(selector).await;
+		if element.is_some() {
+			debug!("ECFRAMEFOUND\t{}", self.item().name);
+		}
 
-    debug!("ECFRAMEFOUND\t{}", self.item().name);
-
-    Some(element)
+    element
   }
 
 
   pub async fn get_survey_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.survey_selector.to_owned().unwrap();
-    let mut element = self.client.find(Locator::Css(&selector)).await;
-    if element.is_err() { return None; };
-    let mut element = element.unwrap();
+		let element = self.get_el(selector).await;
+		if element.is_some() {
+			debug!("SURVEYFOUND\t{}", self.item().name);
+		}
 
-    debug!("SURVEYFOUND\t{}", self.item().name);
-
-    Some(element)
+    element
   }
 
 
   pub async fn get_add_to_cart_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.add_to_cart_selector.to_owned().unwrap();
-    let mut element = self.client.find(Locator::Css(&selector)).await;
-    if element.is_err() { return None; };
-    let mut element = element.unwrap();
+		let element = self.get_el(selector).await;
+			if element.is_some() {
+				debug!("ADDTOCART\t{}", self.item().name);
+			}
 
-    debug!("ADDTOCART\t{}", self.item().name);
-
-    Some(element)
-      // TODO: Check that text actually is add to cart
+		element
   }
 
   pub async fn get_insurance_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.insurance_selector.to_owned().unwrap();
-    let mut element = self.client.find(Locator::Css(&selector)).await;
-    if element.is_err() { return None; };
-    let mut element = element.unwrap();
+		let element = self.get_el_with_text(selector, "NO,THANKS".to_owned()).await;
+			if element.is_some() {
+				debug!("INSURANCEFOUND\t{}", self.item().name);
+			}
 
-    let text = element.text().await;
-    let mut r = None;
-    if text.is_ok() {
-      let text = text.unwrap().to_uppercase().replace(" ", "");
-      if text.eq("NO,THANKS") {
-        debug!("INSURANCEFOUND\t{}", self.item().name);
-        r = Some(element);
-      } 
-    } 
-
-    r
+		element
   }
 
   pub async fn get_success_el(&mut self) -> Option<Element> {
@@ -231,9 +217,6 @@ impl Bot {
 
     r
   }
-
-
-
 
   pub async fn get_continue_to_payment_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.continue_to_payment_selector.to_owned().unwrap();
@@ -282,9 +265,6 @@ impl Bot {
 
     r
   }
-
-
-
 
   pub async fn get_save_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.save_selector.to_owned().unwrap();
