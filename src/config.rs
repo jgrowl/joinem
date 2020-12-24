@@ -85,6 +85,8 @@ pub struct JoinemConfig {
   pub amazon_chrome_user_data_template: Option<String>,
 
   pub newegg_sign_in_url: String,
+
+	pub should_login: bool,
 }
 
 

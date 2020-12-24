@@ -95,7 +95,10 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
 	// let mut bots = run_amazon().await;
 
 	// Newegg
-		newegg_login().await;
+		if JOINEM_CONFIG.should_login {
+			newegg_login().await;
+		}
+
 		let mut bots = run_newegg().await;
 		// cleanup(bots).await;
 	});

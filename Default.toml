@@ -1,6 +1,7 @@
 #newegg_chrome_user_data_template = "TEMPLATE_NEWEGG_CHROME_USER_DATA"
 #amazon_chrome_user_data_template = "TEMPLATE_AMAZON_CHROME_USER_DATA"
 
+should_login = true
 
 newegg_sign_in_url = "https://secure.newegg.com/NewMyAccount/AccountLogin.aspx?nextpage=https%3A%2F%2Fsecure.newegg.com%2Fshop%2Fcart"
 
