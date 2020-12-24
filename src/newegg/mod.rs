@@ -295,7 +295,6 @@ impl Bot {
     Some(element)
   }
 
-
   pub async fn get_secure_checkout_el(&mut self) -> Option<Element> {
     let selector = JOINEM_CONFIG.secure_checkout_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
@@ -329,7 +328,7 @@ impl Bot {
   // }
 
 
-	pub async fn auto(&mut self, elements: &NeweggElements, item: Item) -> Action {
+	pub async fn auto_purchase(&mut self, elements: &NeweggElements, item: Item) -> Action {
     let current_url = self.client.current_url().await.unwrap();
     let path = current_url.path();
 
@@ -402,7 +401,7 @@ impl Bot {
       // Review your order
   }
 
-	pub async fn auto2(&mut self, elements: &NeweggElements) -> Action {
+	pub async fn auto_login(&mut self, elements: &NeweggElements) -> Action {
 		if let Some(utag_data) = &elements.utag_data {
 			if let Some(user_name) = &utag_data.user_name {
 				return End
