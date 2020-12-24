@@ -5,6 +5,9 @@ newegg_password = "newegg_password"
 cvv = "000"
 card_number = "55555555555555"
 
+# should_amazon = false
+# should_newegg = false
+
 #[[items]]
 #name = "AMD Ryzen 5950X"
 #url = "https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N"

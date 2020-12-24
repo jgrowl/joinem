@@ -91,16 +91,19 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   println!("Waiting for Ctrl-C...");
 
 	let spawn = tokio::spawn(async move {
-  // Amazon
-	// let mut bots = run_amazon().await;
 
-	// Newegg
-		if JOINEM_CONFIG.should_login {
-			newegg_login().await;
+		if JOINEM_CONFIG.should_amazon {
+			let mut bots = run_amazon().await;
 		}
 
-		let mut bots = run_newegg().await;
-		// cleanup(bots).await;
+		if JOINEM_CONFIG.should_newegg {
+			if JOINEM_CONFIG.should_login {
+				newegg_login().await;
+			}
+
+			let mut bots = run_newegg().await;
+			// cleanup(bots).await;
+		}
 	});
 
   while running.load(Ordering::SeqCst) { }

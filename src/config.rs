@@ -87,6 +87,8 @@ pub struct JoinemConfig {
   pub newegg_sign_in_url: String,
 
 	pub should_login: bool,
+	pub should_amazon: bool,
+	pub should_newegg: bool,
 }
 
 
