@@ -1,5 +1,6 @@
 pub mod elements;
 
+use std::str::FromStr;
 use log::{info, warn, debug};
 use fantoccini::{Client, Locator, Element, Form};
 use crate::JOINEM_CONFIG;
@@ -45,6 +46,16 @@ impl Bot {
 		self.get_el(selector).await
 	}
 
+	async fn get_affordable_buy_now_el(&mut self) -> Option<Element> {
+		let buy_now = self.get_buy_now_el().await?;
+		let price = self.get_price().await?;
+		if price <= self.item.clone().unwrap().max_price {
+			Some(buy_now)
+		} else {
+			None
+		}
+	}
+
 	async fn get_submit_order_el(&mut self) -> Option<Element> {
 		let selector = JOINEM_CONFIG.amazon.selectors.submit_order.to_owned().unwrap();
 		self.get_el(selector).await
@@ -74,6 +85,15 @@ impl Bot {
 	async fn get_price_el(&mut self)-> Option<Element> {
 		let selector = JOINEM_CONFIG.amazon.selectors.price.to_owned().unwrap();
 		self.get_el(selector).await
+	}
+
+	async fn get_price(&mut self)-> Option<f32> {
+		let mut price_el = self.get_price_el().await?;
+		let text = price_el.text().await.unwrap();
+		let dollar_string = text.replace("$", "");
+		let dollar_string = dollar_string.replace(",", "");
+		let float = f32::from_str(&dollar_string).unwrap();
+		Some(float)
 	}
 
 	async fn get_sign_in_form(&mut self)  -> Option<Form> {
@@ -138,22 +158,20 @@ impl Bot {
 		let current_url = self.client.current_url().await.unwrap();
 		let path = current_url.path();
 
-		if elements.sign_in_form.is_some() {
-			Submit(elements.sign_in_form.clone().unwrap())
-		} else if elements.reject_coverage_el.is_some() {
+		if let Some(sign_in) = elements.sign_in_form.clone() {
+			Submit(sign_in)
+		} else if let Some(reject_coverage) = elements.reject_coverage_el.clone() {
 			info!("COVERAGEREJECT\t{}", item.name);
-			Click(elements.reject_coverage_el.as_ref().unwrap().clone())
-		} else if elements.turbo_checkout_el.is_some() { 
+			Click(reject_coverage)
+		} else if let Some(turbo_checkout) = elements.turbo_checkout_el.clone() { 
 			info!("TURBOCHECKOUT\t{}", item.name);
-			Click(elements.turbo_checkout_el.clone().unwrap())
-		} else if elements.submit_order_el.is_some() {
+			Click(turbo_checkout)
+		} else if let Some(submit_order) = elements.submit_order_el.clone() {
 			info!("ORDERSUBMIT\t{}", item.name);
-			Click(elements.submit_order_el.clone().unwrap())
-		} else if elements.price.is_some() 
-				&& elements.buy_now_el.is_some() 
-				&& elements.price.unwrap() <= item.max_price {
-				info!("AFFORDABLE\t{}", item.name);
-				Click(elements.buy_now_el.clone().unwrap())
+			Click(submit_order)
+		// } else if let Some(affordable_buy_now) = elements.affordable_buy_now_el.clone() {
+		} else if let Some(affordable_buy_now) = self.get_affordable_buy_now_el().await {
+			Click(affordable_buy_now)
 		} else {
       debug!("SLEEP");
 			Wait

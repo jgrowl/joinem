@@ -29,6 +29,7 @@ pub struct AmazonElements {
   pub reject_coverage_el: Option<Element>,
 	pub account_list_el: Option<Element>,
 	pub buy_now_el: Option<Element>,
+	pub affordable_buy_now_el: Option<Element>,
 	pub login_el: Option<Element>,
 	pub price_el: Option<Element>,
 	pub price: Option<f32>,
@@ -45,20 +46,12 @@ impl AmazonElements {
 		let reject_coverage_el = bot.get_reject_coverage_el().await;
 		let account_list_el = bot.get_account_list_el().await;
 		let buy_now_el = bot.get_buy_now_el().await;
+		let affordable_buy_now_el = bot.get_affordable_buy_now_el().await;
+
 		let login_el = bot.get_login_el().await;
 
 		let price_el = bot.get_price_el().await;
-		let price = match price_el.clone() {
-			None => None,
-			Some(mut el) => {
-				let text = el.text().await.unwrap();
-				let dollar_string = text.replace("$", "");
-				let dollar_string = dollar_string.replace(",", "");
-
-				let float = f32::from_str(&dollar_string).unwrap();
-				Some(float)
-			}
-		};
+		let price = bot.get_price().await; 
 
 		let sign_in_form = bot.get_sign_in_form().await;
 
@@ -81,6 +74,7 @@ impl AmazonElements {
 			reject_coverage_el,
 			account_list_el,
 			buy_now_el,
+			affordable_buy_now_el,
 			login_el,
 			price_el,
 			price,
