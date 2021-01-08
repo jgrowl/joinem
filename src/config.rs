@@ -34,23 +34,20 @@ pub struct Item {
 } 
 
 #[derive(Debug, Deserialize)]
-pub struct JoinemConfig {
-  pub webdriver_url: Option<String>,
-  pub refresh_seconds: Option<u64>,
-
+pub struct NeweggConfig {
+	pub is_on: bool,
+  pub should_login: bool,
+	pub selectors: NeweggSelectors,
   pub newegg_username: String,
   pub newegg_password: String,
-  pub username: String,
-  pub password: String,
-  pub chrome_user_data: Option<String>, 
-  pub data: String,
-  pub items: Vec<Item>,
-  pub newegg_items: Vec<Item>,
-  pub args: Vec<String>,
-  pub chrome_bin: Option<String>,
   pub cvv: Option<String>,
   pub card_number: Option<String>,
+  pub sign_in_url: String,
+  pub items: Option<Vec<Item>>,
+}
 
+#[derive(Debug, Deserialize)]
+pub struct NeweggSelectors {
   pub card_number_selector: Option<String>,
   pub cvv_selector: Option<String>,
   pub username_selector: Option<String>,
@@ -69,6 +66,51 @@ pub struct JoinemConfig {
   pub sign_in_selector: Option<String>,
   pub success_selector: Option<String>,
 
+  pub reject_coverage_selector: Option<String>,
+}
+
+
+#[derive(Debug, Deserialize)]
+pub struct AmazonConfig {
+	pub is_on: bool,
+	pub selectors: AmazonSelectors,
+  pub sign_in_url: String,
+  pub should_login: bool,
+  pub username: String,
+  pub password: String,
+  pub items: Option<Vec<Item>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AmazonSelectors {
+  pub buy_now: Option<String>,
+  pub account_list: Option<String>,
+  pub price: Option<String>,
+  pub sign_in_form: Option<String>,
+  pub email: Option<String>,
+  pub password: Option<String>,
+  pub submit_order: Option<String>,
+  pub turbo_frame: Option<String>,
+  pub turbo_checkout: Option<String>,
+	pub reject_coverage_selector: Option<String>
+}
+
+#[derive(Debug, Deserialize)]
+pub struct JoinemConfig {
+  pub webdriver_url: Option<String>,
+
+  pub amazon: AmazonConfig,
+  pub newegg: NeweggConfig,
+
+  pub refresh_seconds: Option<u64>,
+
+  pub chrome_user_data: Option<String>, 
+  pub data: String,
+  // pub items: Vec<Item>,
+  // pub newegg_items: Vec<Item>,
+  pub args: Vec<String>,
+  pub chrome_bin: Option<String>,
+
   pub linux_chrome_bin_default: String,
   pub macos_chrome_bin_default: String,
   pub windows_chrome_bin_default: String, 
@@ -84,13 +126,11 @@ pub struct JoinemConfig {
   pub newegg_chrome_user_data_template: Option<String>,
   pub amazon_chrome_user_data_template: Option<String>,
 
-  pub newegg_sign_in_url: String,
 
-	pub should_login: bool,
-	pub should_amazon: bool,
-	pub should_newegg: bool,
+	// pub should_login: bool,
+	// pub should_amazon: bool,
+	// pub should_newegg: bool,
 }
-
 
 impl JoinemConfig {
   pub fn new() -> Result<Self, ConfigError> {

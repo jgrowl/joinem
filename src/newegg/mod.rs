@@ -17,6 +17,12 @@ use crate::JOINEM_CONFIG;
 
 use utag_data::Utag_Data;
 use crate::types::Action;
+use crate::bot::Bot as BaseBot;
+
+impl BaseBot for Bot {
+  fn client(&mut self) -> &mut Client { &mut self.client }
+  fn item(&mut self) -> &mut Option<Item> { &mut self.item }
+}
 
 pub struct Bot {
   pub client: Client,
@@ -32,12 +38,12 @@ impl Bot {
     bot
   }
 
-  pub async fn goto(&mut self) {
-      self.client.goto(&self.item().url.clone()).await;
-  }
+  // pub async fn goto(&mut self) {
+  //     self.client.goto(&self.item_url()).await;
+  // }
 
   pub async fn goto_login(&mut self) {
-    let url = JOINEM_CONFIG.newegg_sign_in_url.clone();
+    let url = JOINEM_CONFIG.newegg.sign_in_url.clone();
       self.client.goto(&url).await;
   }
 
@@ -45,29 +51,33 @@ impl Bot {
       self.client.close().await;
   }
 
-  pub async fn refresh(&mut self) {
-      self.client.refresh().await;
+  pub fn item_name(&self) -> String {
+    self.item().name
+  }
+
+  pub fn item_url(&self) -> String {
+    self.item().url
   }
 
   pub async fn get_card_number_el_and_try_fill(&mut self) -> Option<Element> {
     // <input type="text" class="form-text is-wide mask-cardnumber" aria-label="Card Number" value="">
-    let card_number_selector = JOINEM_CONFIG.card_number_selector.to_owned().unwrap();
+    let card_number_selector = JOINEM_CONFIG.newegg.selectors.card_number_selector.to_owned().unwrap();
     let element = self.client.find(Locator::Css(&card_number_selector)).await;
     if element.is_err() { return None; };
 
     let mut card_number_input = element.unwrap();
 
-    debug!("CARDFOUND\t{}", self.item().name);
-    let card_number = JOINEM_CONFIG.card_number.to_owned().unwrap();
+    debug!("CARDFOUND\t{}", self.item_name());
+    let card_number = JOINEM_CONFIG.newegg.card_number.to_owned().unwrap();
     card_number_input.clone().click().await;
     // card_number_input.clear().await;
 
     match card_number_input.send_keys(&card_number).await {
       Ok(success) => { 
-        debug!("CARDFILL\t{}", self.item().name); 
+        debug!("CARDFILL\t{}", self.item_name()); 
       },
       Err(err) => {
-        debug!("CARDFILLFAILED\t{}", self.item().name)
+        debug!("CARDFILLFAILED\t{}", self.item_name())
       }
     };
 
@@ -75,17 +85,17 @@ impl Bot {
   }
 
   pub async fn get_cvv_el_and_try_fill(&mut self) -> Option<Element> {
-    let cvv_selector = JOINEM_CONFIG.cvv_selector.to_owned().unwrap();
+    let cvv_selector = JOINEM_CONFIG.newegg.selectors.cvv_selector.to_owned().unwrap();
     match self.client.find(Locator::Css(&cvv_selector)).await {
       Ok(mut cvv_input) => {
-        debug!("CVV4FOUND\t{}", self.item().name);
-        let cvv = JOINEM_CONFIG.cvv.to_owned().unwrap();
+        debug!("CVV4FOUND\t{}", self.item_name());
+        let cvv = JOINEM_CONFIG.newegg.cvv.to_owned().unwrap();
         cvv_input.clone().click().await;
         cvv_input.clear().await;
         match cvv_input.send_keys(&cvv).await {
-          Ok(success) => { debug!("CVV4FILL\t{}", self.item().name); },
+          Ok(success) => { debug!("CVV4FILL\t{}", self.item_name()); },
           Err(err) => {
-            debug!("CVV4FILLFAILED\t{}", self.item().name)
+            debug!("CVV4FILLFAILED\t{}", self.item_name())
           }
         };
         Some(cvv_input)
@@ -95,13 +105,13 @@ impl Bot {
   }
 
   pub async fn get_username_el_and_try_fill(&mut self) -> Option<Element> {
-    let username_selector = JOINEM_CONFIG.username_selector.to_owned().unwrap();
+    let username_selector = JOINEM_CONFIG.newegg.selectors.username_selector.to_owned().unwrap();
     let element = self.client.find(Locator::Id(&username_selector)).await;
     if element.is_err() { return None; };
     let mut username_input = element.unwrap();
 
     debug!("NEWEGGEMAILFOUND");
-    let username = JOINEM_CONFIG.newegg_username.to_owned();
+    let username = JOINEM_CONFIG.newegg.newegg_username.to_owned();
     match username_input.send_keys(&username).await {
           Ok(success) => { debug!("NEWEGGEMAILFILL") },
           Err(err) => {
@@ -113,13 +123,13 @@ impl Bot {
   }
 
   pub async fn get_password_el_and_try_fill(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.password_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.password_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Id(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
 
     debug!("PASSFOUND");
-    let value = JOINEM_CONFIG.newegg_password.to_owned();
+    let value = JOINEM_CONFIG.newegg.newegg_password.to_owned();
 
     match element.send_keys(&value).await {
           Ok(success) => { debug!("PASSFILLSUCCESS"); },
@@ -136,7 +146,7 @@ impl Bot {
     // let sign_in_submit = self.client.find(Locator::Id("signInSubmit")).await;
 
   pub async fn get_sign_in_submit_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.sign_in_submit_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.sign_in_submit_selector.to_owned().unwrap();
 		let element = self.get_el(selector).await;
 		if element.is_some() {
 			debug!("SIGNINSUBMITFOUND");
@@ -147,10 +157,10 @@ impl Bot {
 
 
   pub async fn get_ec_frame_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.ec_frame_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.ec_frame_selector.to_owned().unwrap();
 		let element = self.get_el(selector).await;
 		if element.is_some() {
-			debug!("ECFRAMEFOUND\t{}", self.item().name);
+			debug!("ECFRAMEFOUND\t{}", self.item_name());
 		}
 
     element
@@ -158,10 +168,10 @@ impl Bot {
 
 
   pub async fn get_survey_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.survey_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.survey_selector.to_owned().unwrap();
 		let element = self.get_el(selector).await;
 		if element.is_some() {
-			debug!("SURVEYFOUND\t{}", self.item().name);
+			debug!("SURVEYFOUND\t{}", self.item_name());
 		}
 
     element
@@ -169,27 +179,27 @@ impl Bot {
 
 
   pub async fn get_add_to_cart_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.add_to_cart_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.add_to_cart_selector.to_owned().unwrap();
 		let element = self.get_el(selector).await;
 			if element.is_some() {
-				debug!("ADDTOCART\t{}", self.item().name);
+				debug!("ADDTOCART\t{}", self.item_name());
 			}
 
 		element
   }
 
   pub async fn get_insurance_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.insurance_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.insurance_selector.to_owned().unwrap();
 		let element = self.get_el_with_text(selector, "NO,THANKS".to_owned()).await;
 			if element.is_some() {
-				debug!("INSURANCEFOUND\t{}", self.item().name);
+				debug!("INSURANCEFOUND\t{}", self.item_name());
 			}
 
 		element
   }
 
   pub async fn get_success_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.success_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.success_selector.to_owned().unwrap();
 		self.get_el(selector).await
   }
 
@@ -219,7 +229,7 @@ impl Bot {
   }
 
   pub async fn get_continue_to_payment_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.continue_to_payment_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.continue_to_payment_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
@@ -227,7 +237,7 @@ impl Bot {
   }
 
   pub async fn get_promotion_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.promotion_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.promotion_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
@@ -237,7 +247,7 @@ impl Bot {
     if text.is_ok() {
       let text = text.unwrap().to_uppercase().replace(" ", "");
       if text.eq("I'MNOTINTERESTED.") {
-        debug!("PROMOTIONFOUND\t{}", self.item().name);
+        debug!("PROMOTIONFOUND\t{}", self.item_name());
         r = Some(element);
       } 
     } 
@@ -246,7 +256,7 @@ impl Bot {
   }
 
   pub async fn get_sign_in_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.sign_in_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.sign_in_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
@@ -256,7 +266,7 @@ impl Bot {
     if text.is_ok() {
       let text = text.unwrap().to_uppercase().replace(" ", "");
       if text.eq("SIGNIN/REGISTER") {
-        debug!("SAVEFOUND\t{}", self.item().name);
+        debug!("SAVEFOUND\t{}", self.item_name());
         r = Some(element);
       } 
     } 
@@ -265,7 +275,7 @@ impl Bot {
   }
 
   pub async fn get_save_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.save_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.save_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
@@ -275,7 +285,7 @@ impl Bot {
     if text.is_ok() {
       let text = text.unwrap().to_uppercase().replace(" ", "");
       if text.eq("SAVE") {
-        debug!("SAVEFOUND\t{}", self.item().name);
+        debug!("SAVEFOUND\t{}", self.item_name());
         r = Some(element);
       } 
     } 
@@ -288,7 +298,7 @@ impl Bot {
   }
 
   pub async fn get_view_cart_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.view_cart_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.view_cart_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
@@ -296,7 +306,7 @@ impl Bot {
   }
 
   pub async fn get_secure_checkout_el(&mut self) -> Option<Element> {
-    let selector = JOINEM_CONFIG.secure_checkout_selector.to_owned().unwrap();
+    let selector = JOINEM_CONFIG.newegg.selectors.secure_checkout_selector.to_owned().unwrap();
     let mut element = self.client.find(Locator::Css(&selector)).await;
     if element.is_err() { return None; };
     let mut element = element.unwrap();
@@ -401,24 +411,24 @@ impl Bot {
       // Review your order
   }
 
-	pub async fn auto_login(&mut self, elements: &NeweggElements) -> Action {
-		if let Some(utag_data) = &elements.utag_data {
-			if let Some(user_name) = &utag_data.user_name {
-				return End
-			}
-		}
-		
-		if elements.sign_in_submit_el.is_some() {
-			debug!("NEWEGGSIGNIN");
-			Click(elements.sign_in_submit_el.clone().unwrap())
-		} else if elements.sign_in_el.is_some() {
-			Click(elements.sign_in_el.clone().unwrap())
-		} else {
-			debug!("SLEEP");
-			Wait
-		}
-	}
-	}
+  pub async fn auto_login(&mut self, elements: &NeweggElements) -> Action {
+    if let Some(utag_data) = &elements.utag_data {
+      if let Some(user_name) = &utag_data.user_name {
+        return End
+      }
+    }
+
+    if elements.sign_in_submit_el.is_some() {
+      debug!("NEWEGGSIGNIN");
+      Click(elements.sign_in_submit_el.clone().unwrap())
+    } else if elements.sign_in_el.is_some() {
+      Click(elements.sign_in_el.clone().unwrap())
+    } else {
+      debug!("SLEEP");
+      Wait
+    }
+  }
+}
 
       // self.client.clone().enter_parent_frame().await;
 

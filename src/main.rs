@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_variables))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_variables, warnings))]
 
 #[macro_use]
 extern crate lazy_static;
@@ -11,8 +11,9 @@ mod amazon;
 mod newegg;
 mod webdriver;
 mod util;
+mod bot;
 
-use fantoccini::{Client, Locator};
+use fantoccini::{Client, Locator, Element};
 use tokio::time::delay_for;
 use async_std::future;
 
@@ -27,11 +28,15 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{JoinemConfig, Item};
 use crate::types::ElementResult;
-use crate::amazon::check_amazon_item;
+// use crate::amazon::check_amazon_item;
 use crate::newegg::{Bot as NeweggBot};
+use crate::newegg::elements::NeweggElements;
+
+use crate::amazon::{Bot as AmazonBot};
+use crate::bot::Bot;
+use crate::amazon::elements::AmazonElements;
 
 use crate::webdriver::new_client;
-use crate::newegg::elements::NeweggElements;
 
 // use num_bigint::{ToBigInt, RandBigInt};
 // use num::traits::ToPrimitive;
@@ -42,10 +47,8 @@ use std::str::FromStr;
 use rand::prelude::*;
 use std::{io, fs};
 
-// use crate::types::Action::{Stay, Wait, Click, End};
 use crate::types::Action::*;
 use crate::types::Action;
-
 
 extern crate ctrlc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -91,18 +94,32 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   println!("Waiting for Ctrl-C...");
 
 	let spawn = tokio::spawn(async move {
+		if JOINEM_CONFIG.amazon.is_on {
+			if JOINEM_CONFIG.amazon.should_login {
+				amazon_login().await;
+			}
 
-		if JOINEM_CONFIG.should_amazon {
-			let mut bots = run_amazon().await;
+			match JOINEM_CONFIG.amazon.items.clone() {
+				None => return (),
+				Some(items) => {
+					let mut bots = run_amazon(items).await;
+					// cleanup(bots).await;
+				}
+			}
 		}
 
-		if JOINEM_CONFIG.should_newegg {
-			if JOINEM_CONFIG.should_login {
+		if JOINEM_CONFIG.newegg.is_on {
+			if JOINEM_CONFIG.newegg.should_login {
 				newegg_login().await;
 			}
 
-			let mut bots = run_newegg().await;
-			// cleanup(bots).await;
+			match JOINEM_CONFIG.newegg.items.clone() {
+				None => return (),
+				Some(items) => {
+					let mut bots = run_newegg(items).await;
+					// cleanup(bots).await;
+				}
+			}
 		}
 	});
 
@@ -112,7 +129,7 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
   Ok(())
 }
 
-async fn action_handler(mut bot: &mut NeweggBot, action: Action) -> bool {
+async fn action_handler<T: Bot + Send>(mut bot: &mut T, action: Action) -> bool {
 	match action {
 		Stay => {
 			delay_for(Duration::from_secs(2)).await;
@@ -121,18 +138,44 @@ async fn action_handler(mut bot: &mut NeweggBot, action: Action) -> bool {
 			element.click().await;
 			delay_for(Duration::from_secs(3)).await;
 		},
+		Submit(form) => {
+			form.submit().await;
+			delay_for(Duration::from_secs(3)).await;
+		},
 		Wait => {
 			let refresh_seconds = JOINEM_CONFIG.refresh_seconds();
 			delay_for(Duration::from_secs(refresh_seconds)).await;
 			bot.refresh().await;
 		},
 		End => {
-			info!("NEWEGGLOGGEDIN");
+			info!("Ended!");
 			delay_for(Duration::from_secs(2)).await;
 			return true;
 		}
 	}
+
 	return false;
+}
+
+async fn amazon_login() {
+  {
+    let out_dir = JOINEM_CONFIG.amazon_chrome_user_data_template();
+
+    let mut client = new_client(out_dir).await.expect("Failed to create new client!");
+    let mut bot = AmazonBot::new(client, None).await;
+
+    bot.goto_login().await;
+
+		loop {
+			let elements = AmazonElements::new(&mut bot).await;
+			let action = bot.auto_login(&elements).await;
+			if action_handler(&mut bot, action).await {
+				break;
+			}
+		};
+
+		bot.close().await;
+	};
 }
 
 async fn newegg_login() {
@@ -156,8 +199,7 @@ async fn newegg_login() {
 	};
 }
 
-async fn run_newegg() -> Vec<Bot2> {
-  let items = JOINEM_CONFIG.newegg_items.clone();
+async fn run_newegg(items: Vec<Item>) -> Vec<ItemWithHandle> {
   let mut spawns = vec![]; 
   for item in items.into_iter() {
     let the_item = item.clone();
@@ -180,59 +222,77 @@ async fn run_newegg() -> Vec<Bot2> {
       bot.close().await;
     });
 
-    spawns.push(Bot2{item: the_item, handle: spawn});
+    spawns.push(ItemWithHandle{item: the_item, handle: spawn});
   }
   spawns
 }
 
-async fn run_amazon() -> Vec<Bot2> {
-  // let mut c = new_client().await.expect("Failed to create new client!");
-  // if !is_logged_in_to_amazon(& mut c).await {
-  //   info!("Not logged into Amazon.");
-  //   info!("Attempting to login to Amazon!");
-  //   amazon_login(& mut c).await;
-  // } else {
-  //   info!("Already logged in to Amazon.");
-  // }
-  //
-  // c.close().await;
 
-  // let url = "https://www.amazon.com/AMD-Ryzen-5950X-32-Thread-Processor/dp/B0815Y8J9N";
-  // check_amazon_item(url).await;
-  let items = JOINEM_CONFIG.items.clone();
+async fn run_amazon(items: Vec<Item>) -> Vec<ItemWithHandle> {
+	let mut spawns = vec![];
+	for item in items.into_iter() {
+		let the_item = item.clone();
+		debug!("Starting {:?}", item.name);
+		let spawn = tokio::spawn(async move {
+			let out_dir = JOINEM_CONFIG.find_or_create_data_folder();
+			let mut client = new_client(out_dir).await.expect("Failed to create new client!");
+			let mut bot = AmazonBot::new(client, Some(item.clone())).await;
+			bot.goto().await;
 
-  let mut spawns = vec![]; 
-  for item in items.into_iter() {
-    let the_item = item.clone();
-    debug!("Starting {:?}", item.name);
-    let spawn = tokio::spawn(async move {
+			loop {
+				let elements = AmazonElements::new(&mut bot).await;
+				let action = bot.auto_purchase(&elements, item.clone()).await;
 
-      let out_dir = JOINEM_CONFIG.find_or_create_data_folder();
-      let client = new_client(out_dir).await.expect("Failed to create new client!");
+				if action_handler(&mut bot, action).await {
+					break;
+				}
+			}
 
-      check_amazon_item(client, item.clone()).await;
-    });
-    spawns.push(Bot2{item: the_item, handle: spawn});
+			bot.close().await;
+		});
 
-    // We have to wait because we are using a global variable in a
-    // multi-threaded app. If we don't do this then another thread 
-    // grab the chrome data directory before the thread that
-    // created it has a chance to register the name
-    //
-    // WARNING: Touching the data_dirs global will be dangerous!
-    //
-    delay_for(Duration::from_secs(1)).await
-  }
+		spawns.push(ItemWithHandle{item: the_item, handle: spawn});
+	}
 
-  return spawns;
+	spawns
 }
 
-struct Bot2 {
+
+// async fn run_amazon() -> Vec<ItemWithHandle> {
+//   let items = JOINEM_CONFIG.items.clone();
+//
+//   let mut spawns = vec![];
+//   for item in items.into_iter() {
+//     let the_item = item.clone();
+//     debug!("Starting {:?}", item.name);
+//     let spawn = tokio::spawn(async move {
+//
+//       let out_dir = JOINEM_CONFIG.find_or_create_data_folder();
+//       let client = new_client(out_dir).await.expect("Failed to create new client!");
+//
+//       // check_amazon_item(client, item.clone()).await;
+//     });
+//     spawns.push(ItemWithHandle{item: the_item, handle: spawn});
+//
+//     // We have to wait because we are using a global variable in a
+//     // multi-threaded app. If we don't do this then another thread
+//     // grab the chrome data directory before the thread that
+//     // created it has a chance to register the name
+//     //
+//     // WARNING: Touching the data_dirs global will be dangerous!
+//     //
+//     delay_for(Duration::from_secs(1)).await
+//   }
+//
+//   return spawns;
+// }
+
+struct ItemWithHandle {
   item: Item,
   handle: tokio::task::JoinHandle<()>
 }
 
-async fn cleanup(bots: Vec<Bot2>) {
+async fn cleanup(bots: Vec<ItemWithHandle>) {
   for bot in bots {
     println!("Doin somethin");
     // let enter = bot.handle;

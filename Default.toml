@@ -1,33 +1,9 @@
 #newegg_chrome_user_data_template = "TEMPLATE_NEWEGG_CHROME_USER_DATA"
 #amazon_chrome_user_data_template = "TEMPLATE_AMAZON_CHROME_USER_DATA"
 
-should_login = true
-should_amazon = true
-should_newegg = true
-
-newegg_sign_in_url = "https://secure.newegg.com/NewMyAccount/AccountLogin.aspx?nextpage=https%3A%2F%2Fsecure.newegg.com%2Fshop%2Fcart"
-
 data = "joinem_data"
 webdriver_url = "http://localhost:9515"
 refresh_seconds = 15
-
-cvv_selector = "input[type='text'].mask-cvv-4"
-username_selector = "labeled-input-signEmail"
-password_selector = "labeled-input-password"
-survey_selector = "a.centerPopup-trigger-close"
-sign_in_submit_selector = "#signInSubmit"
-insurance_selector = "div[role='dialog'] div[role='document'] div button[data-dismiss='modal']"
-promotion_selector = "div[role='dialog'] div[role='document'] div div div button[data-dismiss='modal']"
-continue_to_payment_selector = "div[data-status='add'] button.btn-primary"
-view_cart_selector = "button[title='View Cart & Checkout'].btn-primary"
-add_to_cart_selector = "div#ProductBuy button.btn-primary"
-secure_checkout_selector = "form div.summary-actions button.btn-primary" 
-ec_frame_selector = "iframe[title='ec_payment']"
-card_number_selector = "input[type='text'].mask-cardnumber"
-save_selector = "button.btn-primary"
-sign_in_selector = "div.nav-complex div.nav-complex-title"
-
-success_selector = "a[title='View order detail in a new window.']"
 
 args = [
   "--disable-gpu", 
@@ -76,4 +52,40 @@ windows_canary_user_data_default = "%LOCALAPPDATA%\\Google\\Chrome SxS\\User Dat
 
 other_chrome_user_data_default = "~/.config/chromium"
 
+[newegg]
+is_on = true
+should_login = true
+sign_in_url = "https://secure.newegg.com/NewMyAccount/AccountLogin.aspx?nextpage=https%3A%2F%2Fsecure.newegg.com%2Fshop%2Fcart"
+	[newegg.selectors]
+	cvv_selector = "input[type='text'].mask-cvv-4"
+	username_selector = "labeled-input-signEmail"
+	password_selector = "labeled-input-password"
+	survey_selector = "a.centerPopup-trigger-close"
+	sign_in_submit_selector = "#signInSubmit"
+	insurance_selector = "div[role='dialog'] div[role='document'] div button[data-dismiss='modal']"
+	promotion_selector = "div[role='dialog'] div[role='document'] div div div button[data-dismiss='modal']"
+	continue_to_payment_selector = "div[data-status='add'] button.btn-primary"
+	view_cart_selector = "button[title='View Cart & Checkout'].btn-primary"
+	add_to_cart_selector = "div#ProductBuy button.btn-primary"
+	secure_checkout_selector = "form div.summary-actions button.btn-primary" 
+	ec_frame_selector = "iframe[title='ec_payment']"
+	card_number_selector = "input[type='text'].mask-cardnumber"
+	save_selector = "button.btn-primary"
+	sign_in_selector = "div.nav-complex div.nav-complex-title"
+	success_selector = "a[title='View order detail in a new window.']"
 
+[amazon]
+is_on = true
+sign_in_url = "https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Fgp%2Fcss%2Fhomepage.html%3Fie%3DUTF8%26%252AVersion%252A%3D1%26%252Aentries%252A%3D0"
+should_login = true
+	[amazon.selectors]
+	reject_coverage_selector = "#siNoCoverage-announce"
+	buy_now = "#buyNow"
+	account_list = "#nav-link-accountList"
+	price = "#price_inside_buybox"
+	sign_in_form = "form[name='signIn']"
+	password = "#ap_password"
+	email = "#ap_email"
+	submit_order = "#submitOrderButtonId"
+	turbo_frame = "#turbo-checkout-iframe"
+	turbo_checkout = "#turbo-checkout-place-order-button"
